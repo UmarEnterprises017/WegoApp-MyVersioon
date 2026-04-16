@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch *)",
+      "Bash(git stash)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(remove-item *)",
+      "Bash(tasklist)",
+      "Bash(findstr *)"
+    ]
+  },
+  "$version": 3
+}
