@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Your Interests',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: const InterestsScreen(),
-    );
-  }
-}
-
 class InterestsScreen extends StatefulWidget {
   const InterestsScreen({super.key});
 
@@ -29,7 +8,7 @@ class InterestsScreen extends StatefulWidget {
 }
 
 class _InterestsScreenState extends State<InterestsScreen> {
-  static const Color primaryRed = Color(0xFFEF4060);
+  static const Color primaryBlue = Color(0xFF4A6CF7);
 
   final Set<String> _selectedInterests = {'Shopping', 'Run', 'Traveling'};
 
@@ -65,7 +44,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Please select at least one interest'),
-          backgroundColor: primaryRed,
+          backgroundColor: primaryBlue,
           behavior: SnackBarBehavior.floating,
           shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -79,8 +58,12 @@ class _InterestsScreenState extends State<InterestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color secondaryTextColor = isDark ? Colors.white70 : Colors.black54;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +79,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? Colors.grey[900] : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -108,8 +91,8 @@ class _InterestsScreenState extends State<InterestsScreen> {
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.maybePop(context),
-                      icon: const Icon(Icons.arrow_back_ios,
-                          color: Colors.black87, size: 18),
+                      icon: Icon(Icons.arrow_back_ios,
+                          color: textColor, size: 18),
                       padding: EdgeInsets.zero,
                     ),
                   ),
@@ -118,7 +101,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                     child: const Text(
                       'Skip',
                       style: TextStyle(
-                        color: primaryRed,
+                        color: primaryBlue,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -131,12 +114,12 @@ class _InterestsScreenState extends State<InterestsScreen> {
             const SizedBox(height: 20),
 
             // Title & Subtitle
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
                 'Your interests',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: textColor,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.2,
@@ -149,7 +132,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
               child: Text(
                 'Select a few of your interests and let everyone\nknow what you\'re passionate about.',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: secondaryTextColor,
                   fontSize: 13.5,
                   height: 1.5,
                 ),
@@ -183,6 +166,8 @@ class _InterestsScreenState extends State<InterestsScreen> {
                       icon: icon,
                       isSelected: isSelected,
                       onTap: () => _toggleInterest(label),
+                      primaryBlue: primaryBlue,
+                      textColor: textColor,
                     );
                   },
                 ),
@@ -200,13 +185,13 @@ class _InterestsScreenState extends State<InterestsScreen> {
                 child: ElevatedButton(
                   onPressed: _handleContinue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryRed,
+                    backgroundColor: primaryBlue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                     elevation: 4,
-                    shadowColor: primaryRed.withValues(alpha: 0.4),
+                    shadowColor: primaryBlue.withValues(alpha: 0.4),
                   ),
                   child: const Text(
                     'Continue',
@@ -230,22 +215,25 @@ class _InterestsScreenState extends State<InterestsScreen> {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
+    required Color primaryBlue,
+    required Color textColor,
   }) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? primaryRed : Colors.white,
+          color: isSelected ? primaryBlue : (isDark ? Colors.grey[900] : Colors.white),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? primaryRed : Colors.grey.shade200,
+            color: isSelected ? primaryBlue : (isDark ? Colors.white12 : Colors.grey.shade200),
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
             BoxShadow(
-              color: primaryRed.withValues(alpha: 0.25),
+              color: primaryBlue.withValues(alpha: 0.25),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -265,7 +253,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.white : primaryRed,
+                color: isSelected ? Colors.white : primaryBlue,
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -274,7 +262,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                   label,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
+                    color: isSelected ? Colors.white : textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),

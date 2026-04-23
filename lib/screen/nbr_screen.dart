@@ -2,27 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wego_marriage/screen/otp_screen.dart';
 
-void main() {
-  runApp(const NbrApp());
-}
-
-class NbrApp extends StatelessWidget {
-  const NbrApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Phone Login',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3333FF)),
-        useMaterial3: true,
-      ),
-      home: const NbrScreen(),
-    );
-  }
-}
-
 class NbrScreen extends StatefulWidget {
   const NbrScreen({super.key});
 
@@ -34,8 +13,9 @@ class _NbrScreenState extends State<NbrScreen> {
   final TextEditingController _phoneController = TextEditingController();
   String _selectedCountryCode = '+91';
   String _selectedCountryFlag = 'IN';
-  String _selectedCountryName = 'India';
   String? _phoneError;
+
+  static const Color primaryBlue = Color(0xFF4A6CF7);
 
   // Country list with name, flag, and code
   final List<Map<String, String>> _countries = [
@@ -94,8 +74,12 @@ class _NbrScreenState extends State<NbrScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color secondaryTextColor = isDark ? Colors.white70 : Colors.black54;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -107,9 +91,9 @@ class _NbrScreenState extends State<NbrScreen> {
               // Back Button
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_ios,
-                  color: Colors.grey,
+                  color: textColor.withValues(alpha: 0.5),
                   size: 20,
                 ),
               ),
@@ -117,12 +101,12 @@ class _NbrScreenState extends State<NbrScreen> {
               const SizedBox(height: 32),
 
               // Title
-              const Text(
+              Text(
                 'ENTER YOUR\nNUMBER.',
                 style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF3333FF),
+                  color: primaryBlue,
                   height: 1.15,
                   letterSpacing: 0.5,
                 ),
@@ -139,10 +123,10 @@ class _NbrScreenState extends State<NbrScreen> {
                     onTap: _showCountryPickerDialog,
                     child: Container(
                       padding: const EdgeInsets.only(bottom: 8),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: Colors.black87,
+                            color: textColor.withValues(alpha: 0.8),
                             width: 1.5,
                           ),
                         ),
@@ -152,16 +136,16 @@ class _NbrScreenState extends State<NbrScreen> {
                         children: [
                           Text(
                             '$_selectedCountryFlag  $_selectedCountryCode',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: Colors.black87,
+                              color: textColor,
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(
+                          Icon(
                             Icons.keyboard_arrow_down,
-                            color: Colors.black54,
+                            color: textColor.withValues(alpha: 0.6),
                             size: 20,
                           ),
                         ],
@@ -183,27 +167,27 @@ class _NbrScreenState extends State<NbrScreen> {
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(15),
                           ],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black87,
+                            color: textColor,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Phone Number',
                             hintStyle: TextStyle(
-                              color: Colors.grey.shade400,
+                              color: isDark ? Colors.white38 : Colors.grey.shade400,
                               fontSize: 16,
                             ),
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
                                 color: _phoneError != null
                                     ? Colors.red
-                                    : const Color(0xFF7B5CF0),
+                                    : primaryBlue.withValues(alpha: 0.4),
                                 width: 1.5,
                               ),
                             ),
                             focusedBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: Color(0xFF3333FF),
+                                color: primaryBlue,
                                 width: 2,
                               ),
                             ),
@@ -247,7 +231,7 @@ class _NbrScreenState extends State<NbrScreen> {
                 text: TextSpan(
                   style: TextStyle(
                     fontSize: 12.5,
-                    color: Colors.grey.shade600,
+                    color: secondaryTextColor,
                     height: 1.6,
                   ),
                   children: [
@@ -258,7 +242,7 @@ class _NbrScreenState extends State<NbrScreen> {
                     TextSpan(
                       text: 'process your data in our Privacy Policy and Cookies',
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: textColor,
                         decoration: TextDecoration.underline,
                         fontWeight: FontWeight.w500,
                       ),
@@ -276,7 +260,7 @@ class _NbrScreenState extends State<NbrScreen> {
                 child: ElevatedButton(
                   onPressed: _handleContinue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3333FF),
+                    backgroundColor: primaryBlue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(32),
@@ -353,6 +337,7 @@ class _NbrScreenState extends State<NbrScreen> {
   }
 
   void _showLoadingDialog() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -360,7 +345,7 @@ class _NbrScreenState extends State<NbrScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -369,24 +354,24 @@ class _NbrScreenState extends State<NbrScreen> {
               ),
             ],
           ),
-          child: const Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 40,
                 width: 40,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3333FF)),
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryBlue),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Loading...',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ],
@@ -432,9 +417,10 @@ class _NbrScreenState extends State<NbrScreen> {
   }
 
   void _showCountryPickerDialog() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -453,17 +439,17 @@ class _NbrScreenState extends State<NbrScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF3333FF),
+                      color: primaryBlue,
                     ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black87),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
+            Divider(height: 1, color: isDark ? Colors.white12 : Colors.grey.shade300),
             // Country List
             Expanded(
               child: ListView.builder(
@@ -481,7 +467,7 @@ class _NbrScreenState extends State<NbrScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? const Color(0xFF3333FF) : Colors.black87,
+                        color: isSelected ? primaryBlue : (isDark ? Colors.white : Colors.black87),
                       ),
                     ),
                     trailing: Text(
@@ -489,7 +475,7 @@ class _NbrScreenState extends State<NbrScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: isSelected ? const Color(0xFF3333FF) : Colors.grey[600],
+                        color: isSelected ? primaryBlue : (isDark ? Colors.white60 : Colors.grey[600]),
                       ),
                     ),
                     selected: isSelected,
@@ -497,7 +483,6 @@ class _NbrScreenState extends State<NbrScreen> {
                       setState(() {
                         _selectedCountryCode = country['code']!;
                         _selectedCountryFlag = country['flag']!;
-                        _selectedCountryName = country['name']!;
                       });
                       Navigator.pop(context);
                     },

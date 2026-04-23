@@ -1,24 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'WeGo Marriage',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
-      home: const ProfileDiscoveryScreen(),
-    );
-  }
-}
-
 // ── Colors ───────────────────────────────────────────────────
 const Color kPurple = Color(0xFF6B4EFF);
 const Color kPurpleLight = Color(0xFF7B61FF);
@@ -61,7 +43,8 @@ const ProfileData sampleProfile = ProfileData(
 
 // ── Main Screen ───────────────────────────────────────────────
 class ProfileDiscoveryScreen extends StatefulWidget {
-  const ProfileDiscoveryScreen({super.key});
+  final ProfileData? profile;
+  const ProfileDiscoveryScreen({super.key, this.profile});
 
   @override
   State<ProfileDiscoveryScreen> createState() => _ProfileDiscoveryScreenState();
@@ -83,8 +66,12 @@ class _ProfileDiscoveryScreenState extends State<ProfileDiscoveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final displayProfile = widget.profile ?? sampleProfile;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Status bar colour
@@ -99,10 +86,10 @@ class _ProfileDiscoveryScreenState extends State<ProfileDiscoveryScreen> {
               child: Column(
                 children: [
                   // ── Profile Card ──
-                  _ProfileCard(profile: sampleProfile),
+                  _ProfileCard(profile: displayProfile),
                   const SizedBox(height: 12),
                   // ── Bio Card ──
-                  _BioCard(profile: sampleProfile),
+                  _BioCard(profile: displayProfile, textColor: textColor, isDark: isDark),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -300,7 +287,9 @@ class _ProfileCard extends StatelessWidget {
 // ── Bio Card ─────────────────────────────────────────────────
 class _BioCard extends StatelessWidget {
   final ProfileData profile;
-  const _BioCard({required this.profile});
+  final Color textColor;
+  final bool isDark;
+  const _BioCard({required this.profile, required this.textColor, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +299,7 @@ class _BioCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: kCardBg,
+          color: isDark ? Colors.grey[900] : kCardBg,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -319,9 +308,9 @@ class _BioCard extends StatelessWidget {
             // Bio text
             Text(
               profile.bio,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.black87,
+                color: textColor,
                 height: 1.5,
               ),
             ),
@@ -331,7 +320,7 @@ class _BioCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: profile.interests
-                  .map((tag) => _InterestChip(label: tag))
+                  .map((tag) => _InterestChip(label: tag, isDark: isDark, textColor: textColor))
                   .toList(),
             ),
           ],
@@ -344,22 +333,24 @@ class _BioCard extends StatelessWidget {
 // ── Interest Chip ─────────────────────────────────────────────
 class _InterestChip extends StatelessWidget {
   final String label;
-  const _InterestChip({required this.label});
+  final bool isDark;
+  final Color textColor;
+  const _InterestChip({required this.label, required this.isDark, required this.textColor});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
-          color: Colors.black87,
+          color: textColor,
           fontWeight: FontWeight.w500,
         ),
       ),

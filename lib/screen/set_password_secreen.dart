@@ -102,6 +102,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
   }
 
   void _showLoadingDialog() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -109,7 +110,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? Colors.grey[900] : Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -118,10 +119,10 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
               ),
             ],
           ),
-          child: const Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 40,
                 width: 40,
                 child: CircularProgressIndicator(
@@ -129,13 +130,13 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3D5AFE)),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Loading...',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ],
@@ -160,8 +161,10 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -175,17 +178,17 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(Icons.arrow_back_ios,
-                        color: primaryBlue, size: 20),
+                    icon: Icon(Icons.arrow_back_ios,
+                        color: isDark ? Colors.white : primaryBlue, size: 20),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: Text(
                         'Set Password',
                         style: TextStyle(
-                          color: primaryBlue,
+                          color: isDark ? Colors.white : primaryBlue,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -204,7 +207,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod '
                     'tempor incididunt ut labore et dolore magna aliqua.',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: isDark ? Colors.white70 : Colors.grey[600],
                   fontSize: 13.5,
                   height: 1.5,
                   letterSpacing: 0.1,
@@ -214,12 +217,13 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
               const SizedBox(height: 36),
 
               // Password Label
-              _buildLabel('Password'),
+              _buildLabel('Password', isDark ? Colors.white : Colors.black),
               const SizedBox(height: 10),
               _buildPasswordField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 errorText: _passwordError,
+                isDark: isDark,
                 onToggle: () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 },
@@ -228,12 +232,13 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
               const SizedBox(height: 28),
 
               // Confirm Password Label
-              _buildLabel('Confirm Password'),
+              _buildLabel('Confirm Password', isDark ? Colors.white : Colors.black),
               const SizedBox(height: 10),
               _buildPasswordField(
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirm,
                 errorText: _confirmPasswordError,
+                isDark: isDark,
                 onToggle: () {
                   setState(() => _obscureConfirm = !_obscureConfirm);
                 },
@@ -273,11 +278,11 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, Color color) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Colors.black,
+      style: TextStyle(
+        color: color,
         fontSize: 16,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.2,
@@ -289,6 +294,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
     required TextEditingController controller,
     required bool obscureText,
     required VoidCallback onToggle,
+    required bool isDark,
     String? errorText,
   }) {
     return Column(
@@ -296,7 +302,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFEEF0FF),
+            color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFEEF0FF),
             borderRadius: BorderRadius.circular(14),
             border: errorText != null
                 ? Border.all(color: Colors.red, width: 1.5)
@@ -305,15 +311,15 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
           child: TextField(
             controller: controller,
             obscureText: obscureText,
-            style: const TextStyle(
-              color: Colors.black87,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
               fontSize: 15,
               letterSpacing: 2,
             ),
             decoration: InputDecoration(
               hintText: '••••••••••••',
               hintStyle: TextStyle(
-                color: Colors.grey[400],
+                color: isDark ? Colors.white30 : Colors.grey[400],
                 fontSize: 15,
                 letterSpacing: 3,
               ),
@@ -327,7 +333,7 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                   obscureText
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
-                  color: Colors.grey[500],
+                  color: isDark ? Colors.white70 : Colors.grey[500],
                   size: 22,
                 ),
                 onPressed: onToggle,

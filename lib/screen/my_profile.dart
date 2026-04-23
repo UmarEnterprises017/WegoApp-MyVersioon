@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'follow_list_screen.dart';
-import 'profile_edit.dart';
-import 'notification_screen.dart';
-import 'policy_privacy.dart';
-import 'setting_screeen.dart';
-import 'help_center_screen.dart';
-import '../providers/user_provider.dart';
+import 'package:wego_marriage/screen/follow_list_screen.dart';
+import 'package:wego_marriage/screen/profile_edit.dart';
+import 'package:wego_marriage/screen/notification_screen.dart';
+import 'package:wego_marriage/screen/policy_privacy.dart';
+import 'package:wego_marriage/screen/setting_screeen.dart';
+import 'package:wego_marriage/screen/help_center_screen.dart';
+import 'package:wego_marriage/providers/user_provider.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -191,9 +191,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   onTap: () {},
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.75,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF5B2BE8),
-                      borderRadius: BorderRadius.horizontal(left: Radius.circular(24)),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(24)),
+                      border: Theme.of(context).brightness == Brightness.dark 
+                          ? const Border(left: BorderSide(color: Colors.white10)) 
+                          : null,
                     ),
                     child: SafeArea(
                       child: Column(
@@ -202,20 +205,23 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           Align(
                             alignment: Alignment.topRight,
                             child: IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                              icon: Icon(Icons.close, 
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87, 
+                                size: 28),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
-                          const Text(
+                          Text(
                             'Menu',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 24),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.person_outline,
                             title: 'Edit Profile',
                             color: Colors.blue,
@@ -225,6 +231,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             },
                           ),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.notifications_outlined,
                             title: 'Notifications',
                             color: Colors.orange,
@@ -234,6 +241,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             },
                           ),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.privacy_tip_outlined,
                             title: 'Privacy',
                             color: Colors.green,
@@ -243,6 +251,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             },
                           ),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.settings_outlined,
                             title: 'Settings',
                             color: Colors.purple,
@@ -252,6 +261,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             },
                           ),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.help_outline,
                             title: 'Help & Support',
                             color: Colors.teal,
@@ -262,6 +272,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           ),
                           const Spacer(),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.logout,
                             title: 'Logout',
                             color: Colors.red,
@@ -297,18 +308,20 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required Color color,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -318,16 +331,16 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white54,
+              color: isDark ? Colors.white54 : Colors.black26,
               size: 16,
             ),
           ],
@@ -414,20 +427,22 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>().user;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF4A6CF7);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF5B2BE8),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5B2BE8),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
+        automaticallyImplyLeading: false,
+        title: Text(
           'My Profile',
           style: TextStyle(
-            color: Colors.white,
+            color: textColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -435,7 +450,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+            icon: Icon(Icons.menu, color: textColor, size: 28),
             onPressed: () => _showMenu(context),
           ),
         ],
@@ -454,10 +469,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
+                      border: Border.all(color: primaryColor, width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 5),
                         ),
@@ -471,26 +486,25 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               loadingBuilder: (_, child, progress) {
                                 if (progress == null) return child;
                                 return Container(
-                                  color: const Color(0xFF7B4EDB),
+                                  color: Colors.grey[300],
                                   child: const Center(
-                                    child: CircularProgressIndicator(
-                                        color: Colors.white),
+                                    child: CircularProgressIndicator(),
                                   ),
                                 );
                               },
-                              errorBuilder: (_, __, ___) => Container(
-                                color: const Color(0xFF7B4EDB),
-                                child: const Icon(Icons.person,
-                                    color: Colors.white, size: 60),
+                              errorBuilder: (_, _, _) => Container(
+                                color: Colors.grey[300],
+                                child: Icon(Icons.person,
+                                    color: primaryColor, size: 60),
                               ),
                             )
                           : Image.file(
                               File(user.avatarUrl),
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: const Color(0xFF7B4EDB),
-                                child: const Icon(Icons.person,
-                                    color: Colors.white, size: 60),
+                              errorBuilder: (_, _, _) => Container(
+                                color: Colors.grey[300],
+                                child: Icon(Icons.person,
+                                    color: primaryColor, size: 60),
                               ),
                             ),
                     ),
@@ -504,7 +518,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3DDC84),
+                          color: primaryColor,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
@@ -521,8 +535,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Center(
               child: Text(
                 user.name,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textColor,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -532,8 +546,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Center(
               child: Text(
                 user.username,
-                style: const TextStyle(
-                  color: Colors.white70,
+                style: TextStyle(
+                  color: subTextColor,
                   fontSize: 14,
                 ),
               ),
@@ -554,11 +568,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   Widget _buildStatsSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -569,7 +584,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               // Scroll to posts section
               _scrollToPosts(context);
             },
-            child: _buildStatItem('Posts', '128'),
+            child: _buildStatItem(context, 'Posts', '128'),
           ),
           GestureDetector(
             onTap: () {
@@ -584,7 +599,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 ),
               );
             },
-            child: _buildStatItem('Followers', '12.5k'),
+            child: _buildStatItem(context, 'Followers', '12.5k'),
           ),
           GestureDetector(
             onTap: () {
@@ -599,7 +614,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 ),
               );
             },
-            child: _buildStatItem('Following', '892'),
+            child: _buildStatItem(context, 'Following', '892'),
           ),
         ],
       ),
@@ -698,27 +713,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   Widget _buildPostsSection() {
-    final List<String> postImages = [
-      'https://picsum.photos/seed/post1/400/400',
-      'https://picsum.photos/seed/post2/400/400',
-      'https://picsum.photos/seed/post3/400/400',
-      'https://picsum.photos/seed/post4/400/400',
-      'https://picsum.photos/seed/post5/400/400',
-      'https://picsum.photos/seed/post6/400/400',
-      'https://picsum.photos/seed/post7/400/400',
-      'https://picsum.photos/seed/post8/400/400',
-      'https://picsum.photos/seed/post9/400/400',
-    ];
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'My Posts',
             style: TextStyle(
-              color: Colors.white,
+              color: textColor,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -745,7 +752,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -759,18 +766,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       loadingBuilder: (_, child, progress) {
                         if (progress == null) return child;
                         return Container(
-                          color: const Color(0xFF7B4EDB),
+                          color: Colors.grey[300],
                           child: const Center(
                             child: CircularProgressIndicator(
-                              color: Colors.white,
                               strokeWidth: 2,
                             ),
                           ),
                         );
                       },
-                      errorBuilder: (_, __, ___) => Container(
-                        color: const Color(0xFF7B4EDB),
-                        child: const Icon(Icons.image, color: Colors.white54),
+                      errorBuilder: (_, _, _) => Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image, color: Colors.grey),
                       ),
                     ),
                   ),
@@ -784,6 +790,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   void _showPostDetail(BuildContext context, String imageUrl, int postNumber) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF4A6CF7);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -791,8 +803,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF5B2BE8),
+            color: theme.scaffoldBackgroundColor,
             borderRadius: BorderRadius.circular(16),
+            border: isDark ? Border.all(color: Colors.white12) : null,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -808,17 +821,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   loadingBuilder: (_, child, progress) {
                     if (progress == null) return child;
                     return Container(
-                      color: const Color(0xFF7B4EDB),
+                      color: Colors.grey[300],
                       child: const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                        child: CircularProgressIndicator(),
                       ),
                     );
                   },
-                  errorBuilder: (_, __, ___) => Container(
-                    color: const Color(0xFF7B4EDB),
+                  errorBuilder: (_, _, _) => Container(
+                    color: Colors.grey[300],
                     height: 300,
                     child: const Center(
-                      child: Icon(Icons.image, color: Colors.white54, size: 64),
+                      child: Icon(Icons.image, color: Colors.grey, size: 64),
                     ),
                   ),
                 ),
@@ -830,16 +843,16 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   children: [
                     Text(
                       'Post #$postNumber',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: textColor,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Beautiful moment captured! 📸',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: TextStyle(color: subTextColor, fontSize: 14),
                     ),
                     const SizedBox(height: 16),
                     // Like and comment buttons
@@ -848,20 +861,20 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.favorite_border, color: Colors.white, size: 20),
+                            Icon(Icons.favorite_border, color: textColor, size: 20),
                             const SizedBox(width: 4),
-                            const Text('245', style: TextStyle(color: Colors.white)),
+                            Text('245', style: TextStyle(color: textColor)),
                           ],
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+                            Icon(Icons.chat_bubble_outline, color: textColor, size: 20),
                             const SizedBox(width: 4),
-                            const Text('18', style: TextStyle(color: Colors.white)),
+                            Text('18', style: TextStyle(color: textColor)),
                           ],
                         ),
                         IconButton(
-                          icon: const Icon(Icons.bookmark_border, color: Colors.white),
+                          icon: Icon(Icons.bookmark_border, color: textColor),
                           onPressed: () {},
                         ),
                       ],
@@ -870,14 +883,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3DDC84),
+                        backgroundColor: primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                       child: const Text(
                         'Close',
-                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -890,13 +903,17 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
+  Widget _buildStatItem(BuildContext context, String label, String value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+
     return Column(
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: textColor,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -904,8 +921,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: subTextColor,
             fontSize: 13,
           ),
         ),

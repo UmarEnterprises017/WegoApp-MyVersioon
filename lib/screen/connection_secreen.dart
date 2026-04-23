@@ -1,22 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'sans-serif'),
-      home: const MatchesScreen(),
-    );
-  }
-}
-
 // ─── Data Model ──────────────────────────────────────────────────────────────
 class MatchUser {
   final String name;
@@ -83,8 +66,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ─── Status Bar Spacer ──────────────────────────────
@@ -102,21 +87,21 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Matches',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         'This is a list of people who have liked you\nand your matches.',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.black54,
+                          color: isDark ? Colors.white70 : Colors.black54,
                           height: 1.4,
                         ),
                       ),
@@ -131,7 +116,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     border: Border.all(color: primaryPurple, width: 2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       '1L',
                       style: TextStyle(

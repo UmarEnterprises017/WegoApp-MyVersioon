@@ -1,50 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
 import 'notification_screen.dart';
 import 'password_manager.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Settings',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Poppins',
-      ),
-      home: const SettingsScreen(),
-    );
-  }
-}
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Icon(
+          child: Icon(
             Icons.arrow_back_ios,
-            color: Color(0xFF4A6CF7),
+            color: isDark ? Colors.white : const Color(0xFF4A6CF7),
             size: 20,
           ),
         ),
-        title: const Text(
+        title: Text(
           'Settings',
           style: TextStyle(
-            color: Color(0xFF4A6CF7),
+            color: isDark ? Colors.white : const Color(0xFF4A6CF7),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -75,6 +59,18 @@ class SettingsScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (_) => const PasswordManagerScreen(),
+                  ),
+                );
+              },
+            ),
+            SettingsMenuItem(
+              icon: Icons.dark_mode_outlined,
+              label: 'Theme',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ThemeScreen(),
                   ),
                 );
               },
@@ -141,6 +137,80 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+class ThemeScreen extends StatelessWidget {
+  const ThemeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Icon(
+            Icons.arrow_back_ios,
+            color: isDark ? Colors.white : const Color(0xFF4A6CF7),
+            size: 20,
+          ),
+        ),
+        title: Text(
+          'Theme Setting',
+          style: TextStyle(
+            color: isDark ? Colors.white : const Color(0xFF4A6CF7),
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Consumer<SettingsProvider>(
+        builder: (context, settingsProvider, child) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    settingsProvider.isDarkMode
+                        ? Icons.dark_mode
+                        : Icons.light_mode,
+                    size: 100,
+                    color: const Color(0xFF4A6CF7),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    settingsProvider.isDarkMode ? 'Dark Mode' : 'Light Mode',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Switch.adaptive(
+                    value: settingsProvider.isDarkMode,
+                    onChanged: (value) {
+                      settingsProvider.toggleTheme(value);
+                    },
+                    activeThumbColor: const Color(0xFF4A6CF7),
+                    activeTrackColor: const Color(0xFF4A6CF7).withValues(alpha: 0.5),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class SettingsMenuItem extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -157,6 +227,9 @@ class SettingsMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: InkWell(
@@ -181,7 +254,7 @@ class SettingsMenuItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: isDestructive ? Colors.black87 : Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
               ),

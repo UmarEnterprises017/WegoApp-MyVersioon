@@ -49,8 +49,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fade,
@@ -68,17 +71,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   SizedBox(
                     width: 145,
                     height: 145,
-                    child: CustomPaint(painter: _LogoPainter()),
+                    child: CustomPaint(painter: _LogoPainter(isDark: isDark)),
                   ),
 
                   const SizedBox(height: 18),
 
                   // ── App name ─────────────────────────────────
-                  const Text(
+                  Text(
                     'WeGo\nMarriage',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: kBlue,
+                      color: isDark ? Colors.white : kBlue,
                       fontSize: 36,
                       fontWeight: FontWeight.w300,
                       height: 1.20,
@@ -89,10 +92,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   const SizedBox(height: 8),
 
                   // ── Subtitle ─────────────────────────────────
-                  const Text(
+                  Text(
                     'Dermatology Center',
                     style: TextStyle(
-                      color: kBlueMid,
+                      color: isDark ? Colors.white70 : kBlueMid,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.4,
@@ -103,13 +106,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   const Spacer(flex: 2),
 
                   // ── Description text ─────────────────────────
-                  const Text(
+                  Text(
                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
                         'sed do eiusmod tempor incididunt ut labore et dolore '
                         'magna aliqua.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color(0xFF555555),
+                      color: isDark ? Colors.white60 : const Color(0xFF555555),
                       fontSize: 13,
                       height: 1.6,
                     ),
@@ -162,10 +165,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kBlueSoft,
-                        foregroundColor: kBlue,
+                        backgroundColor: isDark ? Colors.white10 : kBlueSoft,
+                        foregroundColor: isDark ? Colors.white : kBlue,
                         elevation: 0,
                         shape: const StadiumBorder(),
+                        side: isDark ? const BorderSide(color: Colors.white24) : null,
                         textStyle: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
@@ -192,6 +196,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 // ─────────────────────────────────────────────────────────────
 class _LogoPainter extends CustomPainter {
   static const Color kBlue = Color(0xFF2B52F5);
+  final bool isDark;
+
+  _LogoPainter({this.isDark = false});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -199,7 +206,7 @@ class _LogoPainter extends CustomPainter {
     final double h = size.height;
 
     final blueFill = Paint()
-      ..color = kBlue
+      ..color = isDark ? Colors.white : kBlue
       ..style = PaintingStyle.fill;
 
     // ── 1. CROSS ─────────────────────────────────────────────
@@ -255,7 +262,7 @@ class _LogoPainter extends CustomPainter {
 
     // Leaf spine (white cutout vein)
     final spinePaint = Paint()
-      ..color       = Colors.white
+      ..color       = isDark ? Colors.black : Colors.white
       ..style       = PaintingStyle.stroke
       ..strokeWidth = 1.8
       ..strokeCap   = StrokeCap.round;
@@ -270,7 +277,7 @@ class _LogoPainter extends CustomPainter {
 
     // ── 3. WAVE ───────────────────────────────────────────────
     final wavePaint = Paint()
-      ..color       = kBlue
+      ..color       = isDark ? Colors.white : kBlue
       ..style       = PaintingStyle.stroke
       ..strokeWidth = 1.8
       ..strokeCap   = StrokeCap.round;

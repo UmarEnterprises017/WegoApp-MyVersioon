@@ -1,26 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Add Card',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: const AddCardScreen(),
-    );
-  }
-}
-
 // ─────────────────────────────────────────
 //  ADD CARD SCREEN
 // ─────────────────────────────────────────
@@ -48,8 +28,10 @@ class _AddCardScreenState extends State<AddCardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -65,21 +47,21 @@ class _AddCardScreenState extends State<AddCardScreen> {
                     Stack(
                       alignment: Alignment.center,
                       children: [
-                        const Text(
+                        Text(
                           'Add Card',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF2B4DE0),
+                            color: isDark ? Colors.white : const Color(0xFF2B4DE0),
                           ),
                         ),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Icon(
+                            child: Icon(
                               Icons.chevron_left_rounded,
-                              color: Color(0xFF3A5DE0),
+                              color: isDark ? Colors.white : const Color(0xFF3A5DE0),
                               size: 30,
                             ),
                           ),
@@ -444,12 +426,13 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: Colors.black87,
+        color: isDark ? Colors.white70 : Colors.black87,
       ),
     );
   }
@@ -477,9 +460,10 @@ class _InputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F3FF),
+        color: isDark ? Colors.grey[900] : const Color(0xFFF0F3FF),
         borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
@@ -488,16 +472,16 @@ class _InputField extends StatelessWidget {
         inputFormatters: inputFormatters,
         obscureText: obscureText,
         onChanged: onChanged,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
-          color: Color(0xFF3A5DE0),
+          color: isDark ? Colors.white : const Color(0xFF3A5DE0),
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(
+          hintStyle: TextStyle(
             fontSize: 15,
-            color: Color(0xFFADB8E8),
+            color: isDark ? Colors.white38 : const Color(0xFFADB8E8),
             fontWeight: FontWeight.w400,
           ),
           border: InputBorder.none,
@@ -517,13 +501,11 @@ class _InputField extends StatelessWidget {
 class _CardNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final digitsOnly = newValue.text.replaceAll(RegExp(r'\D'), '');
-    final limited = digitsOnly.length > 11
-        ? digitsOnly.substring(0, 11)
-        : digitsOnly;
+    final limited = digitsOnly.length > 11 ? digitsOnly.substring(0, 11) : digitsOnly;
 
     final buffer = StringBuffer();
     for (int i = 0; i < limited.length; i++) {
@@ -543,12 +525,11 @@ class _CardNumberFormatter extends TextInputFormatter {
 class _ExpiryDateFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final digitsOnly = newValue.text.replaceAll(RegExp(r'\D'), '');
-    final limited =
-    digitsOnly.length > 4 ? digitsOnly.substring(0, 4) : digitsOnly;
+    final limited = digitsOnly.length > 4 ? digitsOnly.substring(0, 4) : digitsOnly;
 
     final buffer = StringBuffer();
     for (int i = 0; i < limited.length; i++) {

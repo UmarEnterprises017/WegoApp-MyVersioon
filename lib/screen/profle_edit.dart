@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Profile',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Poppins',
-      ),
-      home: const ProfileEditScreen(),
-    );
-  }
-}
-
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
 
@@ -76,6 +55,28 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   void _updateProfile() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your email'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // TODO: Add your update logic here
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -87,16 +88,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back_ios, color: Color(0xFF4A6CF7)),
-        title: const Text(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: isDark ? Colors.white : const Color(0xFF4A6CF7)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
           'Profile',
           style: TextStyle(
-            color: Color(0xFF4A6CF7),
+            color: isDark ? Colors.white : const Color(0xFF4A6CF7),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -126,8 +133,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       radius: 45,
                       backgroundImage:
                       AssetImage('assets/images/profile.png'),
-                      // Use NetworkImage for URL:
-                      // backgroundImage: NetworkImage('https://your-url.com/photo.jpg'),
                       backgroundColor: Color(0xFFE0E0E0),
                     ),
                   ),
@@ -151,40 +156,46 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             const SizedBox(height: 32),
 
             // Full Name
-            _buildLabel('Full Name'),
+            _buildLabel('Full Name', textColor),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _nameController,
               hint: 'Enter full name',
               keyboardType: TextInputType.name,
+              textColor: textColor,
+              isDark: isDark,
             ),
 
             const SizedBox(height: 20),
 
             // Phone Number
-            _buildLabel('Phone Number'),
+            _buildLabel('Phone Number', textColor),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _phoneController,
               hint: '+1 000 000 0000',
               keyboardType: TextInputType.phone,
+              textColor: textColor,
+              isDark: isDark,
             ),
 
             const SizedBox(height: 20),
 
             // Email
-            _buildLabel('Email'),
+            _buildLabel('Email', textColor),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _emailController,
               hint: 'example@email.com',
               keyboardType: TextInputType.emailAddress,
+              textColor: textColor,
+              isDark: isDark,
             ),
 
             const SizedBox(height: 20),
 
             // Date of Birth
-            _buildLabel('Date Of Birth'),
+            _buildLabel('Date Of Birth', textColor),
             const SizedBox(height: 8),
             GestureDetector(
               onTap: _selectDate,
@@ -194,6 +205,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   hint: 'DD / MM / YYY',
                   keyboardType: TextInputType.datetime,
                   hintColor: const Color(0xFF4A6CF7),
+                  textColor: textColor,
+                  isDark: isDark,
                   suffixIcon: const Icon(
                     Icons.calendar_today_outlined,
                     color: Color(0xFF4A6CF7),
@@ -236,13 +249,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, Color textColor) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
-        color: Colors.black87,
+        color: textColor,
       ),
     );
   }
@@ -250,6 +263,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
+    required Color textColor,
+    required bool isDark,
     TextInputType keyboardType = TextInputType.text,
     Color hintColor = Colors.grey,
     Widget? suffixIcon,
@@ -257,16 +272,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
-        color: Colors.black87,
+        color: textColor,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: hintColor, fontSize: 14),
+        hintStyle: TextStyle(color: isDark ? Colors.white60 : hintColor, fontSize: 14),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFFF0F2FF),
+        fillColor: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFF0F2FF),
         contentPadding:
         const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(

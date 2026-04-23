@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Payment',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'sans-serif',
-      ),
-      home: const PaymentScreen(),
-    );
-  }
-}
-
 // ─────────────────────────────────────────
 //  PAYMENT SCREEN
 // ─────────────────────────────────────────
@@ -29,8 +8,13 @@ class PaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final dividerColor = isDarkMode ? Colors.white24 : const Color(0xFFE0E4F0);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ── Blue Header ───────────────────────
@@ -47,12 +31,12 @@ class PaymentScreen extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // ── Doctor Card ───────────────
-                    _DoctorCard(),
+                    _DoctorCard(isDarkMode: isDarkMode, textColor: textColor, subTextColor: subTextColor),
 
                     const SizedBox(height: 20),
 
                     // Divider
-                    const Divider(color: Color(0xFFE0E4F0), thickness: 1),
+                    Divider(color: dividerColor, thickness: 1),
 
                     const SizedBox(height: 14),
 
@@ -60,28 +44,49 @@ class PaymentScreen extends StatelessWidget {
                     _InfoRow(
                       label: 'Date / Hour',
                       value: 'Month 24, Year / 10:00 AM',
+                      valueStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
                     ),
                     const SizedBox(height: 10),
-                    _InfoRow(label: 'Duration', value: '30 Minutes'),
+                    _InfoRow(label: 'Duration', value: '30 Minutes', valueStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),),
                     const SizedBox(height: 10),
-                    _InfoRow(label: 'Booking for', value: 'Another Person'),
+                    _InfoRow(label: 'Booking for', value: 'Another Person', valueStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),),
 
                     const SizedBox(height: 14),
 
                     // Divider
-                    const Divider(color: Color(0xFFE0E4F0), thickness: 1),
+                    Divider(color: dividerColor, thickness: 1),
 
                     const SizedBox(height: 14),
 
                     // ── Billing Info ──────────────
-                    _InfoRow(label: 'Amount', value: '\$100.00'),
+                    _InfoRow(label: 'Amount', value: '\$100.00', valueStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),),
                     const SizedBox(height: 10),
-                    _InfoRow(label: 'Duration', value: '30 Minutes'),
+                    _InfoRow(label: 'Duration', value: '30 Minutes', valueStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),),
 
                     const SizedBox(height: 14),
 
                     // Divider
-                    const Divider(color: Color(0xFFE0E4F0), thickness: 1),
+                    Divider(color: dividerColor, thickness: 1),
 
                     const SizedBox(height: 14),
 
@@ -94,17 +99,17 @@ class PaymentScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF3A5DE0),
                       ),
-                      valueStyle: const TextStyle(
+                      valueStyle: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
                     ),
 
                     const SizedBox(height: 14),
 
                     // Divider
-                    const Divider(color: Color(0xFFE0E4F0), thickness: 1),
+                    Divider(color: dividerColor, thickness: 1),
 
                     const SizedBox(height: 14),
 
@@ -122,12 +127,12 @@ class PaymentScreen extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               'Card',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: textColor,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -255,6 +260,12 @@ class _BlueHeader extends StatelessWidget {
 //  DOCTOR CARD
 // ─────────────────────────────────────────
 class _DoctorCard extends StatelessWidget {
+  final bool isDarkMode;
+  final Color textColor;
+  final Color subTextColor;
+
+  const _DoctorCard({required this.isDarkMode, required this.textColor, required this.subTextColor});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -266,7 +277,7 @@ class _DoctorCard extends StatelessWidget {
           child: Container(
             width: 70,
             height: 70,
-            color: const Color(0xFFD0D8F0),
+            color: isDarkMode ? Colors.white10 : const Color(0xFFD0D8F0),
             child: Image.network(
               'https://i.pravatar.cc/200?img=47',
               fit: BoxFit.cover,
@@ -303,7 +314,7 @@ class _DoctorCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8ECFF),
+                      color: isDarkMode ? Colors.white12 : const Color(0xFFE8ECFF),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -318,11 +329,11 @@ class _DoctorCard extends StatelessWidget {
               const SizedBox(height: 3),
 
               // Specialty
-              const Text(
+              Text(
                 'Dermato-Endocrinology',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.black54,
+                  color: subTextColor,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -336,12 +347,16 @@ class _DoctorCard extends StatelessWidget {
                     icon: Icons.star,
                     iconColor: const Color(0xFF3A5DE0),
                     label: '5',
+                    isDarkMode: isDarkMode,
+                    textColor: textColor,
                   ),
                   const SizedBox(width: 8),
                   _StatChip(
                     icon: Icons.chat_bubble_outline,
                     iconColor: const Color(0xFF3A5DE0),
                     label: '60',
+                    isDarkMode: isDarkMode,
+                    textColor: textColor,
                   ),
                 ],
               ),
@@ -360,11 +375,15 @@ class _StatChip extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String label;
+  final bool isDarkMode;
+  final Color textColor;
 
   const _StatChip({
     required this.icon,
     required this.iconColor,
     required this.label,
+    required this.isDarkMode,
+    required this.textColor,
   });
 
   @override
@@ -372,7 +391,7 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F3FF),
+        color: isDarkMode ? Colors.white12 : const Color(0xFFF0F3FF),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -382,10 +401,10 @@ class _StatChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: textColor,
             ),
           ),
         ],

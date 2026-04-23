@@ -1,25 +1,5 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Create Account',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: const CreateAccountScreen(),
-    );
-  }
-}
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -39,7 +19,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   static const Color primaryBlue = Color(0xFF3D5AFE);
   static const Color lightBlue = Color(0xFF4D6FFF);
-  // static const Color fieldBg = Color(0xFFEEF0FF);
 
   @override
   void dispose() {
@@ -52,6 +31,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime(2000),
@@ -60,11 +40,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: primaryBlue,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
+            colorScheme: isDark 
+                ? const ColorScheme.dark(
+                    primary: primaryBlue,
+                    onPrimary: Colors.white,
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: primaryBlue,
+                    onPrimary: Colors.white,
+                    onSurface: Colors.black,
+                  ),
           ),
           child: child!,
         );
@@ -82,8 +68,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -97,17 +85,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(Icons.arrow_back_ios,
-                        color: primaryBlue, size: 20),
+                    icon: Icon(Icons.arrow_back_ios,
+                        color: isDark ? Colors.white : primaryBlue, size: 20),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: Text(
                         'New Account',
                         style: TextStyle(
-                          color: primaryBlue,
+                          color: isDark ? Colors.white : primaryBlue,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -122,29 +110,31 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               const SizedBox(height: 28),
 
               // Full Name
-              _buildLabel('Full name'),
+              _buildLabel('Full name', isDark),
               const SizedBox(height: 8),
               _buildTextField(
                 controller: _fullNameController,
-                hint: 'example@example.com',
+                hint: 'John Doe',
                 keyboardType: TextInputType.name,
+                isDark: isDark,
               ),
 
               const SizedBox(height: 20),
 
               // Password
-              _buildLabel('Password'),
+              _buildLabel('Password', isDark),
               const SizedBox(height: 8),
               _buildTextField(
                 controller: _passwordController,
                 hint: '••••••••••••',
                 obscureText: _obscurePassword,
+                isDark: isDark,
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: Colors.grey[500],
+                    color: isDark ? Colors.white54 : Colors.grey[500],
                     size: 22,
                   ),
                   onPressed: () {
@@ -158,29 +148,31 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               const SizedBox(height: 20),
 
               // Email
-              _buildLabel('Email'),
+              _buildLabel('Email', isDark),
               const SizedBox(height: 8),
               _buildTextField(
                 controller: _emailController,
                 hint: 'example@example.com',
                 keyboardType: TextInputType.emailAddress,
+                isDark: isDark,
               ),
 
               const SizedBox(height: 20),
 
               // Mobile Number
-              _buildLabel('Mobile Number'),
+              _buildLabel('Mobile Number', isDark),
               const SizedBox(height: 8),
               _buildTextField(
                 controller: _mobileController,
-                hint: 'example@example.com',
+                hint: '+1 234 567 890',
                 keyboardType: TextInputType.phone,
+                isDark: isDark,
               ),
 
               const SizedBox(height: 20),
 
               // Date of Birth
-              _buildLabel('Date Of Birth'),
+              _buildLabel('Date Of Birth', isDark),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: () => _selectDate(context),
@@ -188,7 +180,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   child: _buildTextField(
                     controller: _dobController,
                     hint: 'DD / MM / YYY',
-                    hintColor: primaryBlue,
+                    hintColor: isDark ? Colors.white54 : primaryBlue,
+                    isDark: isDark,
                   ),
                 ),
               ),
@@ -201,23 +194,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: isDark ? Colors.white60 : Colors.grey[600],
                       fontSize: 12.5,
                     ),
-                    children: const [
-                      TextSpan(text: 'By continuing, you agree to\n'),
+                    children: [
+                      const TextSpan(text: 'By continuing, you agree to\n'),
                       TextSpan(
                         text: 'Terms of Use',
                         style: TextStyle(
-                          color: primaryBlue,
+                          color: isDark ? Colors.white : primaryBlue,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      TextSpan(text: ' and '),
+                      const TextSpan(text: ' and '),
                       TextSpan(
                         text: 'Privacy Policy.',
                         style: TextStyle(
-                          color: primaryBlue,
+                          color: isDark ? Colors.white : primaryBlue,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -261,7 +254,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 child: Text(
                   'or sign up with',
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: isDark ? Colors.white54 : Colors.grey[500],
                     fontSize: 13,
                   ),
                 ),
@@ -277,18 +270,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     icon: Icons.g_mobiledata_rounded,
                     iconSize: 28,
                     onTap: () {},
+                    isDark: isDark,
                   ),
                   const SizedBox(width: 20),
                   _buildSocialButton(
                     icon: Icons.facebook_rounded,
                     iconSize: 24,
                     onTap: () {},
+                    isDark: isDark,
                   ),
                   const SizedBox(width: 20),
                   _buildSocialButton(
                     icon: Icons.fingerprint,
                     iconSize: 24,
                     onTap: () {},
+                    isDark: isDark,
                   ),
                 ],
               ),
@@ -300,15 +296,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 child: RichText(
                   text: TextSpan(
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: isDark ? Colors.white60 : Colors.grey[600],
                       fontSize: 13.5,
                     ),
-                    children: const [
-                      TextSpan(text: 'already have an account? '),
+                    children: [
+                      const TextSpan(text: 'already have an account? '),
                       TextSpan(
                         text: 'Log in',
                         style: TextStyle(
-                          color: lightBlue,
+                          color: isDark ? Colors.white : lightBlue,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -325,11 +321,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, bool isDark) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Colors.black,
+      style: TextStyle(
+        color: isDark ? Colors.white : Colors.black,
         fontSize: 15,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.2,
@@ -340,6 +336,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
+    required bool isDark,
     TextInputType keyboardType = TextInputType.text,
     bool obscureText = false,
     Widget? suffixIcon,
@@ -347,21 +344,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF0FF),
+        color: isDark ? Colors.grey[900] : const Color(0xFFEEF0FF),
         borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
-        style: const TextStyle(
-          color: Colors.black87,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
           fontSize: 15,
         ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: hintColor ?? Colors.grey[400],
+            color: hintColor ?? (isDark ? Colors.white38 : Colors.grey[400]),
             fontSize: 14.5,
           ),
           border: InputBorder.none,
@@ -378,6 +375,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget _buildSocialButton({
     required IconData icon,
     required VoidCallback onTap,
+    required bool isDark,
     double iconSize = 24,
   }) {
     return GestureDetector(
@@ -388,21 +386,94 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: const Color(0xFFCDD0FF),
+            color: isDark ? Colors.white24 : const Color(0xFFCDD0FF),
             width: 1.5,
           ),
-          color: const Color(0xFFEEF0FF),
+          color: isDark ? Colors.grey[900] : const Color(0xFFEEF0FF),
         ),
         child: Icon(
           icon,
-          color: const Color(0xFF5C6BC0),
+          color: isDark ? Colors.white : const Color(0xFF5C6BC0),
           size: iconSize,
         ),
       ),
     );
   }
 
-  void _handleSignUp() {
+  // Email validation with security checks
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return 'Please enter your email';
+    }
+
+    // Check for @ symbol
+    if (!email.contains('@')) {
+      return 'Email must contain @ symbol';
+    }
+
+    // Check for common typo: .con instead of .com
+    if (email.toLowerCase().contains('.con')) {
+      return 'Did you mean .com? Please check your email';
+    }
+
+    // Check for spaces
+    if (email.contains(' ')) {
+      return 'Email cannot contain spaces';
+    }
+
+    // Check for double dots
+    if (email.contains('..')) {
+      return 'Email cannot contain consecutive dots';
+    }
+
+    // Validate email format
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return 'Please enter a valid email address';
+    }
+
+    return null;
+  }
+
+  // Strong password validation
+  String? _validateStrongPassword(String password) {
+    if (password.isEmpty) {
+      return 'Please enter a password';
+    }
+
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+
+    // Check for at least one uppercase letter
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain at least one uppercase letter';
+    }
+
+    // Check for at least one lowercase letter
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain at least one lowercase letter';
+    }
+
+    // Check for at least one number
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain at least one number';
+    }
+
+    // Check for at least one special character
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain at least one special character (!@#\$%^&*)';
+    }
+
+    // Check for spaces
+    if (password.contains(' ')) {
+      return 'Password cannot contain spaces';
+    }
+
+    return null;
+  }
+
+  void _handleSignUp() async {
     final name = _fullNameController.text.trim();
     final password = _passwordController.text;
     final email = _emailController.text.trim();
@@ -417,13 +488,57 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all fields'),
-          backgroundColor: Color(0xFF3D5AFE),
+          backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    // TODO: Add your sign-up / registration logic here
+    // Validate email
+    final emailError = _validateEmail(email);
+    if (emailError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(emailError),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validate strong password
+    final passwordError = _validateStrongPassword(password);
+    if (passwordError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(passwordError),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // Save credentials to SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('saved_email', email.toLowerCase());
+    await prefs.setString('saved_password', password);
+    await prefs.setString('user_name', name);
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Account created successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // Navigate to login screen
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+
     debugPrint('Sign Up: $name | $email | $mobile | $dob');
   }
 }

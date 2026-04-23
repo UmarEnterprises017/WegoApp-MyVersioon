@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:wego_marriage/screen/home_feed_screen.dart';
@@ -53,8 +49,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -67,12 +68,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(Icons.arrow_back_ios,
-                        color: Colors.white, size: 20),
+                    icon: Icon(Icons.arrow_back_ios,
+                        color: textColor, size: 20),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: Text(
                         'Log In',
@@ -104,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Please log in to your account',
                 style: TextStyle(
-                  color: Colors.grey[400],
+                  color: subTextColor,
                   fontSize: 14,
                   letterSpacing: 0.2,
                 ),
@@ -113,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 48),
 
               _buildTextField(
+                context: context,
                 controller: _emailController,
                 hint: 'example@example.com',
                 keyboardType: TextInputType.emailAddress,
@@ -122,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
 
               _buildTextField(
+                context: context,
                 controller: _passwordController,
                 hint: '••••••••••••',
                 obscureText: _obscurePassword,
@@ -216,18 +219,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildSocialButton(
+                    context: context,
                     icon: Icons.g_mobiledata_rounded,
                     iconSize: 28,
                     onTap: _handleGoogleSignIn,
                   ),
                   const SizedBox(width: 20),
                   _buildSocialButton(
+                    context: context,
                     icon: Icons.facebook_rounded,
                     iconSize: 24,
                     onTap: _handleFacebookSignIn,
                   ),
                   const SizedBox(width: 20),
                   _buildSocialButton(
+                    context: context,
                     icon: Icons.fingerprint,
                     iconSize: 24,
                     onTap: _handleBiometricAuth,
@@ -260,6 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildTextField({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
     TextInputType keyboardType = TextInputType.text,
@@ -267,17 +274,18 @@ class _LoginScreenState extends State<LoginScreen> {
     Widget? suffixIcon,
     String? errorText,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E),
+            color: isDark ? const Color(0xFF1A1A2E) : Colors.grey[100],
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: errorText != null
                   ? Colors.red
-                  : const Color(0xFF2A2A4A),
+                  : (isDark ? const Color(0xFF2A2A4A) : Colors.grey[300]!),
               width: 1,
             ),
           ),
@@ -285,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: controller,
             keyboardType: keyboardType,
             obscureText: obscureText,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 15),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
@@ -317,10 +325,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildSocialButton({
+    required BuildContext context,
     required IconData icon,
     required VoidCallback onTap,
     double iconSize = 24,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -329,10 +339,10 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: const Color(0xFF2A2A5A),
+            color: isDark ? const Color(0xFF2A2A5A) : Colors.grey[300]!,
             width: 1.5,
           ),
-          color: const Color(0xFF0D0D1A),
+          color: isDark ? const Color(0xFF0D0D1A) : Colors.white,
         ),
         child: Icon(
           icon,
@@ -341,6 +351,58 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // Email validation with security checks
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return 'Please enter your email';
+    }
+
+    // Check for @ symbol
+    if (!email.contains('@')) {
+      return 'Email must contain @ symbol';
+    }
+
+    // Check for common typo: .con instead of .com
+    if (email.toLowerCase().contains('.con')) {
+      return 'Did you mean .com? Please check your email';
+    }
+
+    // Check for valid Gmail format
+    final gmailRegex = RegExp(r'^[\w-\.]+@gmail\.com$', caseSensitive: false);
+    if (!gmailRegex.hasMatch(email)) {
+      // Check if it's other valid email format
+      final generalEmailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!generalEmailRegex.hasMatch(email)) {
+        return 'Please enter a valid email address';
+      }
+    }
+
+    // Check for spaces
+    if (email.contains(' ')) {
+      return 'Email cannot contain spaces';
+    }
+
+    // Check for double dots
+    if (email.contains('..')) {
+      return 'Email cannot contain consecutive dots';
+    }
+
+    return null;
+  }
+
+  // Password validation for login
+  String? _validatePassword(String password) {
+    if (password.isEmpty) {
+      return 'Please enter your password';
+    }
+
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+
+    return null;
   }
 
   Future<void> _handleLogin() async {
@@ -352,35 +414,28 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordError = null;
     });
 
-    if (email.isEmpty && password.isEmpty) {
+    // Validate email with security checks
+    final emailError = _validateEmail(email);
+    if (emailError != null) {
       setState(() {
-        _emailError = 'Please enter your email';
-        _passwordError = 'Please enter your password';
+        _emailError = emailError;
       });
       return;
     }
 
-    if (email.isEmpty) {
+    // Validate password
+    final passwordError = _validatePassword(password);
+    if (passwordError != null) {
       setState(() {
-        _emailError = 'Please enter your email';
+        _passwordError = passwordError;
       });
       return;
     }
 
-    if (password.isEmpty) {
-      setState(() {
-        _passwordError = 'Please enter your password';
-      });
-      return;
-    }
-
-    // Get saved password from SharedPreferences
+    // Get saved credentials from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     final savedPassword = prefs.getString('saved_password');
-
-    // If no password has been set yet, allow login (first time)
-    final bool isValidCredentials =
-        savedPassword == null || password == savedPassword;
+    final savedEmail = prefs.getString('saved_email');
 
     setState(() {
       _isLoading = true;
@@ -395,40 +450,29 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = false;
     });
 
-    if (!isValidCredentials) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            'Login Failed',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: const Text(
-            'Invalid email or password. Please try again.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16),
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'OK',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
-      );
+    // Check if email matches saved email
+    if (savedEmail != null && email.toLowerCase() != savedEmail.toLowerCase()) {
+      setState(() {
+        _emailError = 'Email does not match registered account';
+      });
       return;
     }
+
+    // Check if password matches saved password
+    if (savedPassword != null && password != savedPassword) {
+      setState(() {
+        _passwordError = 'Password is incorrect. Please try again.';
+      });
+      return;
+    }
+
+    // If no account exists yet, create one (first time login)
+    if (savedEmail == null) {
+      await prefs.setString('saved_email', email.toLowerCase());
+      await prefs.setString('saved_password', password);
+    }
+
+    if (!context.mounted) return;
 
     // ✅ Login successful — HomeFeedScreen per navigate karo
     // pushReplacement: back button se login screen per wapas nahi ja sakta
@@ -707,8 +751,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           });
                           // Simulate verification delay
                           Future.delayed(const Duration(seconds: 1), () {
-                            Navigator.pop(context, true);
-                            _goToHomeAfterLoading();
+                            if (!mounted) return;
+                            if (context.mounted) {
+                              Navigator.pop(context, true);
+                              _goToHomeAfterLoading();
+                            }
                           });
                         },
                   icon: const Icon(Icons.fingerprint, size: 22),
@@ -765,59 +812,5 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const HomeFeedScreen()),
       );
     });
-  }
-
-  void _navigateToHomeAfterLoading() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(primaryBlue), strokeWidth: 3),
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 1), () {
-      if (!mounted) return;
-      Navigator.pop(context);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeFeedScreen()),
-      );
-    });
-  }
-
-  void _showSocialLoginError(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text(
-          'Error',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16),
-        ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'OK',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

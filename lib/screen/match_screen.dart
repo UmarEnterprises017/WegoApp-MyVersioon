@@ -1,30 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'WeGo Marriage',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
-      home: const MatchPopupScreen(),
-    );
-  }
-}
-
 // ── Colors ────────────────────────────────────────────────────
-const Color kPurple = Color(0xFF6B4EFF);
-const Color kPink = Color(0xFFE8405A);
-const Color kPinkLight = Color(0xFFFFF0F2);
-const Color kPinkBtn = Color(0xFFE8405A);
+const Color kPrimaryBlue = Color(0xFF4A6CF7);
 
 // ── Match Screen ──────────────────────────────────────────────
 class MatchPopupScreen extends StatefulWidget {
@@ -44,13 +22,6 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
   @override
   void initState() {
     super.initState();
-
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: kPurple,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
 
     _animCtrl = AnimationController(
       vsync: this,
@@ -77,13 +48,19 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color secondaryTextColor = isDark ? Colors.white70 : Colors.black45;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Status bar
-          Container(color: kPurple, height: MediaQuery.of(context).padding.top),
+          Container(
+            color: kPrimaryBlue,
+            height: MediaQuery.of(context).padding.top,
+          ),
 
           Expanded(
             child: FadeTransition(
@@ -101,7 +78,7 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
                     // ── Text section ──
                     Expanded(
                       flex: 4,
-                      child: _buildBottomSection(),
+                      child: _buildBottomSection(textColor, secondaryTextColor),
                     ),
                   ],
                 ),
@@ -152,21 +129,22 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
         // ── Top center heart badge ──
         Positioned(
           top: 10,
-          child: _HeartBadge(size: 52),
+          child: const _HeartBadge(size: 52),
         ),
 
         // ── Bottom left heart badge ──
         Positioned(
           bottom: 10,
           left: size.width * 0.06,
-          child: _HeartBadge(size: 52),
+          child: const _HeartBadge(size: 52),
         ),
       ],
     );
   }
 
   // ── Bottom Section ────────────────────────────────────────────
-  Widget _buildBottomSection() {
+  Widget _buildBottomSection(Color textColor, Color secondaryTextColor) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return AnimatedBuilder(
       animation: _slideAnim,
       builder: (context, child) {
@@ -186,16 +164,16 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: kPink,
+                color: kPrimaryBlue,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Start a conversation now with each other',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.black45,
+                color: secondaryTextColor,
               ),
             ),
 
@@ -208,7 +186,7 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPinkBtn,
+                  backgroundColor: kPrimaryBlue,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -234,8 +212,8 @@ class _MatchPopupScreenState extends State<MatchPopupScreen>
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPinkLight,
-                  foregroundColor: kPink,
+                  backgroundColor: isDark ? Colors.white10 : kPrimaryBlue.withValues(alpha: 0.1),
+                  foregroundColor: kPrimaryBlue,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -271,6 +249,7 @@ class _PhotoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: width,
       height: height,
@@ -292,13 +271,13 @@ class _PhotoCard extends StatelessWidget {
           loadingBuilder: (ctx, child, progress) {
             if (progress == null) return child;
             return Container(
-              color: Colors.grey[200],
+              color: isDark ? Colors.white10 : Colors.grey[200],
               child: const Center(child: CircularProgressIndicator()),
             );
           },
           errorBuilder: (context, error, stackTrace) => Container(
-            color: Colors.grey[300],
-            child: const Icon(Icons.person, size: 60, color: Colors.grey),
+            color: isDark ? Colors.white10 : Colors.grey[300],
+            child: Icon(Icons.person, size: 60, color: isDark ? Colors.white38 : Colors.grey),
           ),
         ),
       ),
@@ -313,15 +292,16 @@ class _HeartBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.pink.withValues(alpha: 0.25),
+            color: kPrimaryBlue.withValues(alpha: 0.25),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -329,7 +309,7 @@ class _HeartBadge extends StatelessWidget {
       ),
       child: Icon(
         Icons.favorite,
-        color: kPink,
+        color: kPrimaryBlue,
         size: size * 0.50,
       ),
     );

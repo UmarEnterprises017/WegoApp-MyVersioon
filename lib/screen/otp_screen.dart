@@ -3,27 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wego_marriage/screen/set_password_secreen.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'OTP Screen',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3333FF)),
-        useMaterial3: true,
-      ),
-      home: const OtpScreen(),
-    );
-  }
-}
-
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
 
@@ -129,8 +108,11 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -142,9 +124,9 @@ class _OtpScreenState extends State<OtpScreen> {
               // Back Button
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_back_ios,
-                  color: Colors.grey,
+                  color: isDarkMode ? Colors.white70 : Colors.grey,
                   size: 20,
                 ),
               ),
@@ -179,16 +161,16 @@ class _OtpScreenState extends State<OtpScreen> {
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
                       decoration: InputDecoration(
                         counterText: '',
-                        enabledBorder: const UnderlineInputBorder(
+                        enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
-                            color: Colors.black38,
+                            color: isDarkMode ? Colors.white38 : Colors.black38,
                             width: 1.5,
                           ),
                         ),
@@ -225,7 +207,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           ? Colors.red
                           : _canResend
                               ? const Color(0xFF3333FF)
-                              : Colors.grey,
+                              : (isDarkMode ? Colors.white38 : Colors.grey),
                       letterSpacing: 1.2,
                       fontWeight: FontWeight.w500,
                     ),
@@ -338,6 +320,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   void _showLoadingDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -345,7 +328,7 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? const Color(0xFF1A1A2E) : Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -354,10 +337,10 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
             ],
           ),
-          child: const Column(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 40,
                 width: 40,
                 child: CircularProgressIndicator(
@@ -365,13 +348,13 @@ class _OtpScreenState extends State<OtpScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3333FF)),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Loading...',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: isDarkMode ? Colors.white : Colors.black87,
                 ),
               ),
             ],

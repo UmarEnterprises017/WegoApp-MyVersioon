@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wego_marriage/screen/chat_screen.dart';
 
 class PostDetailView extends StatefulWidget {
   final List<String> imageUrls;
@@ -31,6 +32,18 @@ class _PostDetailViewState extends State<PostDetailView> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _navigateToChat() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          username: widget.username,
+          avatarUrl: widget.avatarUrl,
+        ),
+      ),
+    );
   }
 
   @override
@@ -100,6 +113,16 @@ class _PostDetailViewState extends State<PostDetailView> {
                   color: isDark ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Message button
+              GestureDetector(
+                onTap: () => _navigateToChat(),
+                child: Icon(
+                  Icons.message_outlined,
+                  color: primaryColor,
+                  size: 22,
                 ),
               ),
               const Spacer(),

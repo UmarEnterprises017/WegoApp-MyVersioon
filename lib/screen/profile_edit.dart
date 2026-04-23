@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../providers/user_provider.dart';
+import 'package:wego_marriage/providers/user_provider.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -117,21 +117,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   Future<bool> _showPermissionDialog() async {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => PopScope(
         canPop: false,
         child: AlertDialog(
-          backgroundColor: const Color(0xFF5B2BE8),
-          title: const Text(
+          backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+          title: Text(
             '🔒 Gallery Permission',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
           ),
-          content: const Text(
+          content: Text(
             'Please allow access to your gallery to change profile picture.\n\n'
             'This is our security filter.',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
           actions: [
             TextButton(
@@ -162,22 +163,23 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   void _showSettingsDialog() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF5B2BE8),
-        title: const Text(
+        backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+        title: Text(
           'Open Settings',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: isDark ? Colors.white : Colors.black87),
         ),
-        content: const Text(
+        content: Text(
           'Please enable photo access in app settings.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
           ),
           TextButton(
             onPressed: () {
@@ -193,19 +195,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF5B2BE8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5B2BE8),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: Text(
           'Edit Profile',
           style: TextStyle(
-            color: Colors.white,
+            color: textColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -235,18 +240,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             const SizedBox(height: 24),
             
             // Personal Information
-            _buildSectionTitle('Personal Information'),
+            _buildSectionTitle('Personal Information', textColor),
             const SizedBox(height: 12),
             _buildTextField(
               controller: _nameController,
               label: 'Full Name',
               icon: Icons.person,
+              textColor: textColor,
+              isDark: isDark,
             ),
             const SizedBox(height: 12),
             _buildTextField(
               controller: _usernameController,
               label: 'Username',
               icon: Icons.alternate_email,
+              textColor: textColor,
+              isDark: isDark,
             ),
             const SizedBox(height: 12),
             _buildTextField(
@@ -254,18 +263,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               label: 'Bio',
               icon: Icons.description,
               maxLines: 3,
+              textColor: textColor,
+              isDark: isDark,
             ),
             
             const SizedBox(height: 24),
             
             // Contact Information
-            _buildSectionTitle('Contact Information'),
+            _buildSectionTitle('Contact Information', textColor),
             const SizedBox(height: 12),
             _buildTextField(
               controller: _emailController,
               label: 'Email',
               icon: Icons.email,
               keyboardType: TextInputType.emailAddress,
+              textColor: textColor,
+              isDark: isDark,
             ),
             const SizedBox(height: 12),
             _buildTextField(
@@ -273,18 +286,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               label: 'Phone',
               icon: Icons.phone,
               keyboardType: TextInputType.phone,
+              textColor: textColor,
+              isDark: isDark,
             ),
             const SizedBox(height: 12),
             _buildTextField(
               controller: _locationController,
               label: 'Location',
               icon: Icons.location_on,
+              textColor: textColor,
+              isDark: isDark,
             ),
             
             const SizedBox(height: 24),
             
             // Additional Details
-            _buildSectionTitle('Additional Details'),
+            _buildSectionTitle('Additional Details', textColor),
             const SizedBox(height: 12),
             _buildDropdown(
               label: 'Gender',
@@ -295,6 +312,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   _selectedGender = value!;
                 });
               },
+              isDark: isDark,
+              textColor: textColor,
             ),
             const SizedBox(height: 12),
             _buildDropdown(
@@ -306,6 +325,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   _selectedLanguage = value!;
                 });
               },
+              isDark: isDark,
+              textColor: textColor,
             ),
             
             const SizedBox(height: 30),
@@ -334,18 +355,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   border: Border.all(color: Colors.white, width: 3),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 5),
                     ),
                   ],
-                ),
-                child: ClipOval(
+                  ),
+                  child: ClipOval(
                   child: user.avatarUrl.startsWith('http')
                       ? Image.network(
                           user.avatarUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             color: const Color(0xFF7B4EDB),
                             child: const Icon(Icons.person, color: Colors.white, size: 60),
                           ),
@@ -353,14 +374,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       : Image.file(
                           File(user.avatarUrl),
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             color: const Color(0xFF7B4EDB),
                             child: const Icon(Icons.person, color: Colors.white, size: 60),
                           ),
                         ),
-                ),
-              ),
-              Positioned(
+                  ),
+                  ),              Positioned(
                 bottom: 0,
                 right: 0,
                 child: GestureDetector(
@@ -392,11 +412,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, Color textColor) {
     return Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: textColor,
         fontSize: 18,
         fontWeight: FontWeight.bold,
       ),
@@ -407,29 +427,37 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    required Color textColor,
+    required bool isDark,
     int maxLines = 1,
     TextInputType? keyboardType,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextFormField(
         controller: controller,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: textColor),
         maxLines: maxLines,
         keyboardType: keyboardType,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.white70),
+          prefixIcon: Icon(icon, color: isDark ? Colors.white70 : Colors.black54),
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.white70),
+          labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter $label';
+          }
+          if (label == 'Email') {
+            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+            if (!emailRegex.hasMatch(value)) {
+              return 'Please enter a valid email address';
+            }
           }
           return null;
         },
@@ -442,29 +470,31 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     required String value,
     required List<String> items,
     required ValueChanged<String?> onChanged,
+    required bool isDark,
+    required Color textColor,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          dropdownColor: const Color(0xFF5B2BE8),
+          dropdownColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
           items: items.map((String item) {
             return DropdownMenuItem(
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: textColor, fontSize: 16),
               ),
             );
           }).toList(),
           onChanged: onChanged,
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+          icon: Icon(Icons.arrow_drop_down, color: isDark ? Colors.white : Colors.black87),
         ),
       ),
     );

@@ -1,23 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Payment Success',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'sans-serif'),
-      home: const PaymentSuccessScreen(),
-    );
-  }
-}
-
 // ─────────────────────────────────────────
 //  PAYMENT SUCCESS SCREEN
 // ─────────────────────────────────────────
@@ -26,8 +8,12 @@ class PaymentSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final primaryColor = const Color(0xFF3A5DE0);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF3A5DE0),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,9 +23,9 @@ class PaymentSuccessScreen extends StatelessWidget {
               padding: const EdgeInsets.only(left: 16, top: 10),
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(
+                child: Icon(
                   Icons.chevron_left_rounded,
-                  color: Colors.white,
+                  color: primaryColor,
                   size: 32,
                 ),
               ),
@@ -62,14 +48,14 @@ class PaymentSuccessScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white,
+                            color: primaryColor,
                             width: 3.5,
                           ),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Icon(
                             Icons.check_rounded,
-                            color: Colors.white,
+                            color: primaryColor,
                             size: 90,
                           ),
                         ),
@@ -78,12 +64,12 @@ class PaymentSuccessScreen extends StatelessWidget {
                       const SizedBox(height: 36),
 
                       // ── Congratulation ────────────
-                      const Text(
+                      Text(
                         'Congratulation',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: primaryColor,
                           letterSpacing: 0.3,
                         ),
                       ),
@@ -91,19 +77,19 @@ class PaymentSuccessScreen extends StatelessWidget {
                       const SizedBox(height: 10),
 
                       // ── Subtitle ──────────────────
-                      const Text(
+                      Text(
                         'Payment is Successfully',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white,
+                          color: textColor,
                         ),
                       ),
 
                       const SizedBox(height: 50),
 
                       // ── Booking Info Card ─────────
-                      _BookingInfoCard(),
+                      _BookingInfoCard(isDarkMode: isDarkMode, primaryColor: primaryColor, textColor: textColor),
 
                       const SizedBox(height: 40),
                     ],
@@ -122,16 +108,22 @@ class PaymentSuccessScreen extends StatelessWidget {
 //  BOOKING INFO CARD
 // ─────────────────────────────────────────
 class _BookingInfoCard extends StatelessWidget {
+  final bool isDarkMode;
+  final Color primaryColor;
+  final Color textColor;
+
+  const _BookingInfoCard({required this.isDarkMode, required this.primaryColor, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 22),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.18),
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.50),
+          color: primaryColor.withValues(alpha: 0.50),
           width: 1.2,
         ),
       ),
@@ -139,14 +131,14 @@ class _BookingInfoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Description text
-          const Center(
+          Center(
             child: Text(
               'You have successfully booked an\nappointment with',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
-                color: Colors.white,
+                color: textColor,
                 height: 1.5,
               ),
             ),
@@ -155,12 +147,12 @@ class _BookingInfoCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Doctor Name
-          const Text(
+          Text(
             'Dr. Olivia Turner, M.D.',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: primaryColor,
             ),
           ),
 
@@ -176,22 +168,22 @@ class _BookingInfoCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.20),
+                      color: primaryColor.withValues(alpha: 0.20),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.calendar_today_outlined,
-                      color: Colors.white,
+                      color: primaryColor,
                       size: 15,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'Month 24, Year',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white,
+                      color: textColor,
                     ),
                   ),
                 ],
@@ -206,22 +198,22 @@ class _BookingInfoCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.20),
+                      color: primaryColor.withValues(alpha: 0.20),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.access_time_rounded,
-                      color: Colors.white,
+                      color: primaryColor,
                       size: 15,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     '10:00 AM',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white,
+                      color: textColor,
                     ),
                   ),
                 ],

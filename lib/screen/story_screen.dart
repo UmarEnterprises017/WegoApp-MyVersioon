@@ -1,77 +1,7 @@
 import 'package:flutter/material.dart';
-
-// Story model
-class StoryItem {
-  final String imageUrl;
-  final String username;
-  final String avatarUrl;
-
-  StoryItem({required this.imageUrl, required this.username, required this.avatarUrl});
-}
-
-// All stories - each user can have multiple stories
-final List<List<StoryItem>> kAllStories = [
-  // User 1 - 3 stories
-  [
-    StoryItem(
-      imageUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
-      username: 'Sarah',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
-    ),
-    StoryItem(
-      imageUrl: 'https://picsum.photos/seed/story1/800/1200',
-      username: 'Sarah',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
-    ),
-    StoryItem(
-      imageUrl: 'https://picsum.photos/seed/story2/800/1200',
-      username: 'Sarah',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
-    ),
-  ],
-  // User 2 - 2 stories
-  [
-    StoryItem(
-      imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-      username: 'John',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-    ),
-    StoryItem(
-      imageUrl: 'https://picsum.photos/seed/story3/800/1200',
-      username: 'John',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-    ),
-  ],
-  // User 3 - 1 story
-  [
-    StoryItem(
-      imageUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
-      username: 'Emma',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
-    ),
-  ],
-  // User 4 - 2 stories
-  [
-    StoryItem(
-      imageUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
-      username: 'Mike',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
-    ),
-    StoryItem(
-      imageUrl: 'https://picsum.photos/seed/story4/800/1200',
-      username: 'Mike',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
-    ),
-  ],
-  // User 5 - 1 story
-  [
-    StoryItem(
-      imageUrl: 'https://randomuser.me/api/portraits/women/55.jpg',
-      username: 'Lisa',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/55.jpg',
-    ),
-  ],
-];
+import 'package:provider/provider.dart';
+import 'package:wego_marriage/providers/story_provider.dart';
+import 'package:wego_marriage/screen/user_profile_screen.dart';
 
 class StoryScreen extends StatefulWidget {
   final int initialUserIndex;
@@ -117,7 +47,9 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
   }
 
   void _goToNextStory() {
-    final currentUserStories = kAllStories[_currentUserIndex];
+    final storyProvider = context.read<StoryProvider>();
+    final allUserStories = storyProvider.userStories;
+    final currentUserStories = allUserStories[_currentUserIndex].stories;
     
     if (_currentStoryIndex < currentUserStories.length - 1) {
       // Next story of same user
@@ -126,21 +58,28 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
       });
       _animationController.reset();
       _animationController.forward();
-    } else if (_currentUserIndex < kAllStories.length - 1) {
-      // Move to next user
-      setState(() {
-        _currentUserIndex++;
-        _currentStoryIndex = 0;
-      });
-      _animationController.reset();
-      _animationController.forward();
     } else {
-      // No more stories
-      Navigator.of(context).pop();
+      // Current user's stories finished, mark as watched
+      storyProvider.markAsWatched(allUserStories[_currentUserIndex].userId);
+
+      if (_currentUserIndex < allUserStories.length - 1) {
+        // Move to next user
+        setState(() {
+          _currentUserIndex++;
+          _currentStoryIndex = 0;
+        });
+        _animationController.reset();
+        _animationController.forward();
+      } else {
+        // No more stories
+        Navigator.of(context).pop();
+      }
     }
   }
 
   void _goToPreviousStory() {
+    final allUserStories = context.read<StoryProvider>().userStories;
+    
     if (_currentStoryIndex > 0) {
       setState(() {
         _currentStoryIndex--;
@@ -150,7 +89,7 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
     } else if (_currentUserIndex > 0) {
       setState(() {
         _currentUserIndex--;
-        _currentStoryIndex = kAllStories[_currentUserIndex].length - 1;
+        _currentStoryIndex = allUserStories[_currentUserIndex].stories.length - 1;
       });
       _animationController.reset();
       _animationController.forward();
@@ -161,21 +100,40 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
     }
   }
 
-  int _getTotalStoryCount() {
-    int total = 0;
-    for (final userStories in kAllStories) {
-      total += userStories.length;
-    }
-    return total;
+  void _navigateToProfile(String username, String avatarUrl) {
+    _animationController.stop();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(
+          username: username,
+          avatarUrl: avatarUrl,
+        ),
+      ),
+    ).then((_) {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentUserStories = kAllStories[_currentUserIndex];
-    final currentStory = currentUserStories[_currentStoryIndex];
+    final storyProvider = context.watch<StoryProvider>();
+    final allUserStories = storyProvider.userStories;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    
+    // Safety check if index out of bounds due to reordering
+    if (_currentUserIndex >= allUserStories.length) {
+       _currentUserIndex = allUserStories.length - 1;
+    }
+
+    final userStory = allUserStories[_currentUserIndex];
+    final currentStory = userStory.stories[_currentStoryIndex];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Current story image
@@ -200,20 +158,18 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
                 height: double.infinity,
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) {
-                    // Start animation if it was stopped due to loading
                     if (!_isPaused && !_animationController.isAnimating) {
                        _animationController.forward();
                     }
                     return child;
                   }
-                  // Stop animation while loading
                   _animationController.stop();
-                  return const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                  return Center(
+                    child: CircularProgressIndicator(color: isDark ? Colors.white : Colors.black87),
                   );
                 },
-                errorBuilder: (context, error, stackTrace) => const Center(
-                  child: Icon(Icons.broken_image, color: Colors.white, size: 64),
+                errorBuilder: (context, error, stackTrace) => Center(
+                  child: Icon(Icons.broken_image, color: textColor, size: 64),
                 ),
               ),
             ),
@@ -223,14 +179,12 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
           Positioned.fill(
             child: Row(
               children: [
-                // Left side - previous
                 Expanded(
                   child: GestureDetector(
                     onTap: _goToPreviousStory,
                     child: Container(color: Colors.transparent),
                   ),
                 ),
-                // Right side - next
                 Expanded(
                   child: GestureDetector(
                     onTap: _goToNextStory,
@@ -245,13 +199,18 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
           SafeArea(
             child: Column(
               children: [
-                // Progress indicators
+                // Progress indicators (Segments)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   child: AnimatedBuilder(
                     animation: _animationController,
                     builder: (context, child) {
-                      return _buildProgressIndicators();
+                      return Row(
+                        children: List.generate(
+                          userStory.stories.length,
+                          (index) => _buildProgressBar(index, isDark),
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -260,22 +219,29 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(currentStory.avatarUrl),
+                      GestureDetector(
+                        onTap: () => _navigateToProfile(userStory.username, userStory.avatarUrl),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(userStory.avatarUrl),
+                        ),
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        currentStory.username,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () => _navigateToProfile(userStory.username, userStory.avatarUrl),
+                        child: Text(
+                          userStory.username,
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            shadows: isDark ? [const Shadow(color: Colors.black54, blurRadius: 4)] : null,
+                          ),
                         ),
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
+                        icon: Icon(Icons.close, color: textColor),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -289,146 +255,33 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildProgressIndicators() {
-    final totalUsers = kAllStories.length;
-    final List<Widget> indicators = [];
-
-    for (int userIndex = 0; userIndex < totalUsers; userIndex++) {
-      final userStoryCount = kAllStories[userIndex].length;
-      
-      if (userStoryCount == 1) {
-        // Single story user
-        indicators.add(
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _currentUserIndex = userIndex;
-                  _currentStoryIndex = 0;
-                });
-                _animationController.reset();
-                _animationController.forward();
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                height: 3,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white30,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    FractionallySizedBox(
-                      widthFactor: _isUserComplete(userIndex)
-                          ? 1.0
-                          : _isUserCurrent(userIndex)
-                              ? _animationController.value
-                              : 0.0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      } else {
-        // Multiple stories user - show segments
-        indicators.add(
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 3,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  decoration: BoxDecoration(
-                    color: _isUserComplete(userIndex)
-                        ? Colors.white
-                        : _isUserCurrent(userIndex)
-                            ? Colors.white
-                            : Colors.white30,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Sub-indicators for multiple stories
-                Row(
-                  children: List.generate(
-                    userStoryCount,
-                    (storyIndex) => Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _currentUserIndex = userIndex;
-                            _currentStoryIndex = storyIndex;
-                          });
-                          _animationController.reset();
-                          _animationController.forward();
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 1),
-                          height: 2,
-                          child: Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white24,
-                                  borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),
-                              FractionallySizedBox(
-                                widthFactor: _isStoryComplete(userIndex, storyIndex)
-                                    ? 1.0
-                                    : _isStoryCurrent(userIndex, storyIndex)
-                                        ? _animationController.value
-                                        : 0.0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
+  Widget _buildProgressBar(int index, bool isDark) {
+    double progress = 0.0;
+    if (index < _currentStoryIndex) {
+      progress = 1.0;
+    } else if (index == _currentStoryIndex) {
+      progress = _animationController.value;
     }
 
-    return Row(children: indicators);
-  }
-
-  bool _isUserComplete(int userIndex) {
-    return userIndex < _currentUserIndex;
-  }
-
-  bool _isUserCurrent(int userIndex) {
-    return userIndex == _currentUserIndex;
-  }
-
-  bool _isStoryComplete(int userIndex, int storyIndex) {
-    if (userIndex < _currentUserIndex) return true;
-    if (userIndex == _currentUserIndex && storyIndex < _currentStoryIndex) return true;
-    return false;
-  }
-
-  bool _isStoryCurrent(int userIndex, int storyIndex) {
-    return userIndex == _currentUserIndex && storyIndex == _currentStoryIndex;
+    return Expanded(
+      child: Container(
+        height: 3,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white30 : Colors.black26,
+          borderRadius: BorderRadius.circular(2),
+        ),
+        child: FractionallySizedBox(
+          alignment: Alignment.centerLeft,
+          widthFactor: progress,
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white : Colors.black87, // Active story color
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

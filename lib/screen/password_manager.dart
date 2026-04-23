@@ -1,25 +1,5 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Password Manager',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Roboto',
-      ),
-      home: const PasswordManagerScreen(),
-    );
-  }
-}
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PasswordManagerScreen extends StatefulWidget {
   const PasswordManagerScreen({super.key});
@@ -47,27 +27,84 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
     super.dispose();
   }
 
-  void _onChangePassword() {
+  // Strong password validation
+  String? _validateStrongPassword(String password) {
+    if (password.isEmpty) {
+      return 'Please enter a password';
+    }
+
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+
+    // Check for at least one uppercase letter
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain at least one uppercase letter';
+    }
+
+    // Check for at least one lowercase letter
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain at least one lowercase letter';
+    }
+
+    // Check for at least one number
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain at least one number';
+    }
+
+    // Check for at least one special character
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain at least one special character (!@#\$%^&*)';
+    }
+
+    // Check for spaces
+    if (password.contains(' ')) {
+      return 'Password cannot contain spaces';
+    }
+
+    return null;
+  }
+
+  void _onChangePassword() async {
     final current = _currentPasswordController.text;
     final newPass = _newPasswordController.text;
     final confirm = _confirmPasswordController.text;
 
     if (current.isEmpty || newPass.isEmpty || confirm.isEmpty) {
-      _showSnackBar('Tamam fields bharein', isError: true);
+      _showSnackBar('Please fill in all fields', isError: true);
+      return;
+    }
+
+    // Verify current password matches saved password
+    final prefs = await SharedPreferences.getInstance();
+    final savedPassword = prefs.getString('saved_password');
+
+    if (savedPassword != null && current != savedPassword) {
+      _showSnackBar('Current password is incorrect', isError: true);
+      return;
+    }
+
+    // Validate strong password
+    final passwordError = _validateStrongPassword(newPass);
+    if (passwordError != null) {
+      _showSnackBar(passwordError, isError: true);
       return;
     }
 
     if (newPass != confirm) {
-      _showSnackBar('Naya password aur confirm password match nahi karta', isError: true);
+      _showSnackBar('New password and confirm password do not match', isError: true);
       return;
     }
 
-    if (newPass.length < 6) {
-      _showSnackBar('Password kam az kam 6 characters ka hona chahiye', isError: true);
-      return;
-    }
+    // Save new password
+    await prefs.setString('saved_password', newPass);
 
-    _showSnackBar('Password kamyabi se badal diya gaya!');
+    _showSnackBar('Password changed successfully!');
+
+    // Clear fields
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
@@ -83,15 +120,21 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : const Color(0xFF1A1A2E);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        leading: const Icon(
-          Icons.arrow_back_ios,
-          color: Color(0xFF4169E1),
-          size: 20,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Color(0xFF4169E1),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
@@ -109,12 +152,12 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Current Password
-            const Text(
+            Text(
               'Current Password',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: textColor,
               ),
             ),
             const SizedBox(height: 10),
@@ -123,6 +166,8 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
               obscure: _obscureCurrent,
               onToggle: () =>
                   setState(() => _obscureCurrent = !_obscureCurrent),
+              isDarkMode: isDarkMode,
+              textColor: textColor,
             ),
             Align(
               alignment: Alignment.centerRight,
@@ -141,12 +186,12 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
             const SizedBox(height: 8),
 
             // New Password
-            const Text(
+            Text(
               'New Password',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: textColor,
               ),
             ),
             const SizedBox(height: 10),
@@ -154,16 +199,18 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
               controller: _newPasswordController,
               obscure: _obscureNew,
               onToggle: () => setState(() => _obscureNew = !_obscureNew),
+              isDarkMode: isDarkMode,
+              textColor: textColor,
             ),
             const SizedBox(height: 24),
 
             // Confirm New Password
-            const Text(
+            Text(
               'Confirm New Password',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: textColor,
               ),
             ),
             const SizedBox(height: 10),
@@ -172,6 +219,8 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
               obscure: _obscureConfirm,
               onToggle: () =>
                   setState(() => _obscureConfirm = !_obscureConfirm),
+              isDarkMode: isDarkMode,
+              textColor: textColor,
             ),
 
             const Spacer(),
@@ -211,17 +260,19 @@ class _PasswordManagerScreenState extends State<PasswordManagerScreen> {
     required TextEditingController controller,
     required bool obscure,
     required VoidCallback onToggle,
+    required bool isDarkMode,
+    required Color textColor,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F3FF),
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFF0F3FF),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscure,
-        style: const TextStyle(
-          color: Color(0xFF1A1A2E),
+        style: TextStyle(
+          color: textColor,
           fontSize: 15,
           letterSpacing: 2.0,
         ),

@@ -1,38 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import '../providers/user_provider.dart';
-import '../providers/settings_provider.dart';
-import 'welcome_screen.dart'; // ✅
-
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'WeGo Marriage',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E5FF6)),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
-    );
-  }
-}
+import 'package:wego_marriage/screen/welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -89,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-            const WelcomeScreen(), // ✅ welcome_screen.dart
+            const WelcomeScreen(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
@@ -165,9 +133,6 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-// ============================================================
-//  Custom Painter — WeGo Logo (Cross + Leaf + Wave)
-// ============================================================
 class WeGoLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

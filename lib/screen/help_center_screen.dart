@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Help Center',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3D3DDB)),
-        useMaterial3: true,
-      ),
-      home: const HelpCenterScreen(),
-    );
-  }
-}
-
 class HelpCenterScreen extends StatefulWidget {
   const HelpCenterScreen({super.key});
 
@@ -80,15 +59,21 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color secondaryTextColor = isDark ? Colors.white70 : Colors.black54;
+    final Color primaryBlue = const Color(0xFF4A6CF7);
+    final Color cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F0FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ── Blue Header ──
           Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF3D3DDB),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: primaryBlue,
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(28),
                 bottomRight: Radius.circular(28),
               ),
@@ -135,22 +120,23 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                     Container(
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? Colors.grey[900] : Colors.white,
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: const TextField(
+                      child: TextField(
+                        style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                         decoration: InputDecoration(
                           hintText: 'Search...',
                           hintStyle: TextStyle(
-                            color: Color(0xFFBBBBCC),
+                            color: isDark ? Colors.white38 : const Color(0xFFBBBBCC),
                             fontSize: 14,
                           ),
                           prefixIcon: Icon(
                             Icons.search,
-                            color: Color(0xFF3D3DDB),
+                            color: primaryBlue,
                           ),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
                     ),
@@ -170,26 +156,29 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                   // FAQ / Contact Us tabs
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(
                       children: [
-                        _buildTab('FAQ', 0),
-                        _buildTab('Contact Us', 1),
+                        _buildTab('FAQ', 0, primaryBlue),
+                        _buildTab('Contact Us', 1, primaryBlue),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   // Filter chips
-                  Row(
-                    children: _filters
-                        .map((f) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _buildFilterChip(f),
-                    ))
-                        .toList(),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _filters
+                          .map((f) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _buildFilterChip(f, primaryBlue, cardColor),
+                      ))
+                          .toList(),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -210,6 +199,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                             _expandedIndex = isExpanded ? null : index;
                           });
                         },
+                        cardColor: cardColor,
+                        primaryBlue: primaryBlue,
+                        textColor: textColor,
+                        secondaryTextColor: secondaryTextColor,
                       ),
                     );
                   }),
@@ -223,8 +216,9 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 
   // ── FAQ / Contact Us Tab Button ──
-  Widget _buildTab(String label, int index) {
+  Widget _buildTab(String label, int index, Color primaryBlue) {
     final isSelected = _selectedTab == index;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _selectedTab = index),
@@ -233,14 +227,14 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           margin: const EdgeInsets.all(4),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF3D3DDB) : Colors.transparent,
+            color: isSelected ? primaryBlue : Colors.transparent,
             borderRadius: BorderRadius.circular(26),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF9999BB),
+              color: isSelected ? Colors.white : (isDark ? Colors.white38 : const Color(0xFF9999BB)),
               fontWeight:
               isSelected ? FontWeight.bold : FontWeight.w500,
               fontSize: 15,
@@ -252,26 +246,27 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 
   // ── Filter Chip ──
-  Widget _buildFilterChip(String label) {
+  Widget _buildFilterChip(String label, Color primaryBlue, Color cardColor) {
     final isSelected = _selectedFilter == label;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => setState(() => _selectedFilter = label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF3D3DDB) : Colors.white,
+          color: isSelected ? primaryBlue : cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF3D3DDB)
-                : const Color(0xFFDDDDEE),
+                ? primaryBlue
+                : (isDark ? Colors.white10 : const Color(0xFFDDDDEE)),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF9999BB),
+            color: isSelected ? Colors.white : (isDark ? Colors.white60 : const Color(0xFF9999BB)),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -286,6 +281,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     required String answer,
     required bool isExpanded,
     required VoidCallback onTap,
+    required Color cardColor,
+    required Color primaryBlue,
+    required Color textColor,
+    required Color secondaryTextColor,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -293,7 +292,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -315,8 +314,8 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                   Expanded(
                     child: Text(
                       question,
-                      style: const TextStyle(
-                        color: Color(0xFF2D2D4E),
+                      style: TextStyle(
+                        color: textColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -326,7 +325,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                     isExpanded
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
-                    color: const Color(0xFF3D3DDB),
+                    color: primaryBlue,
                     size: 22,
                   ),
                 ],
@@ -341,8 +340,8 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 const EdgeInsets.fromLTRB(16, 0, 16, 14),
                 child: Text(
                   answer,
-                  style: const TextStyle(
-                    color: Color(0xFF6B6B8A),
+                  style: TextStyle(
+                    color: secondaryTextColor,
                     fontSize: 13,
                     height: 1.6,
                   ),

@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Payment Method',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'sans-serif',
-      ),
-      home: const PaymentMethodScreen(),
-    );
-  }
-}
-
 // ─────────────────────────────────────────
 //  PAYMENT METHOD SCREEN
 // ─────────────────────────────────────────
@@ -37,8 +16,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -76,12 +58,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               const SizedBox(height: 30),
 
               // ── Section 1: Credit & Debit Card ───
-              const Text(
+              Text(
                 'Credit & Debit Card',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: textColor,
                 ),
               ),
 
@@ -91,13 +73,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               _PaymentTile(
                 selected: _selectedIndex == 0,
                 onTap: () => setState(() => _selectedIndex = 0),
+                isDarkMode: isDarkMode,
                 child: Row(
                   children: [
                     Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8ECFF),
+                        color: isDarkMode ? Colors.white12 : const Color(0xFFE8ECFF),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
@@ -122,12 +105,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               const SizedBox(height: 28),
 
               // ── Section 2: More Payment Option ───
-              const Text(
+              Text(
                 'More Payment Option',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: textColor,
                 ),
               ),
 
@@ -137,9 +120,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               _PaymentTile(
                 selected: _selectedIndex == 1,
                 onTap: () => setState(() => _selectedIndex = 1),
+                isDarkMode: isDarkMode,
                 child: Row(
                   children: [
-                    const _ApplePayIcon(),
+                    _ApplePayIcon(isDarkMode: isDarkMode),
                     const SizedBox(width: 14),
                     const Text(
                       'Apple Pay',
@@ -159,9 +143,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               _PaymentTile(
                 selected: _selectedIndex == 2,
                 onTap: () => setState(() => _selectedIndex = 2),
+                isDarkMode: isDarkMode,
                 child: Row(
                   children: [
-                    const _PaypalIcon(),
+                    _PaypalIcon(isDarkMode: isDarkMode),
                     const SizedBox(width: 14),
                     const Text(
                       'Paypal',
@@ -181,9 +166,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               _PaymentTile(
                 selected: _selectedIndex == 3,
                 onTap: () => setState(() => _selectedIndex = 3),
+                isDarkMode: isDarkMode,
                 child: Row(
                   children: [
-                    const _GooglePayIcon(),
+                    _GooglePayIcon(isDarkMode: isDarkMode),
                     const SizedBox(width: 14),
                     const Text(
                       'Google Pay',
@@ -211,11 +197,13 @@ class _PaymentTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final Widget child;
+  final bool isDarkMode;
 
   const _PaymentTile({
     required this.selected,
     required this.onTap,
     required this.child,
+    required this.isDarkMode,
   });
 
   @override
@@ -225,7 +213,7 @@ class _PaymentTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF0F3FF),
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFF0F3FF),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -269,7 +257,8 @@ class _PaymentTile extends StatelessWidget {
 
 // Apple Pay Icon (Apple logo)
 class _ApplePayIcon extends StatelessWidget {
-  const _ApplePayIcon();
+  final bool isDarkMode;
+  const _ApplePayIcon({required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +266,7 @@ class _ApplePayIcon extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: const Color(0xFFE8ECFF),
+        color: isDarkMode ? Colors.white12 : const Color(0xFFE8ECFF),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(
@@ -293,7 +282,8 @@ class _ApplePayIcon extends StatelessWidget {
 
 // Paypal Icon (text-based P logo)
 class _PaypalIcon extends StatelessWidget {
-  const _PaypalIcon();
+  final bool isDarkMode;
+  const _PaypalIcon({required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +291,7 @@ class _PaypalIcon extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: const Color(0xFFE8ECFF),
+        color: isDarkMode ? Colors.white12 : const Color(0xFFE8ECFF),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(
@@ -321,7 +311,8 @@ class _PaypalIcon extends StatelessWidget {
 
 // Google Pay Icon (GP text logo)
 class _GooglePayIcon extends StatelessWidget {
-  const _GooglePayIcon();
+  final bool isDarkMode;
+  const _GooglePayIcon({required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +320,7 @@ class _GooglePayIcon extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: const Color(0xFFE8ECFF),
+        color: isDarkMode ? Colors.white12 : const Color(0xFFE8ECFF),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(

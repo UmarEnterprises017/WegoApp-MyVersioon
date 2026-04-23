@@ -4,31 +4,6 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'WeGo Marriage',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
-      home: const CallingScreen(),
-    );
-  }
-}
-
 // ── Colors ────────────────────────────────────────────────────
 const Color kPurple = Color(0xFF6B4EFF);
 const Color kRed = Color(0xFFE8405A);
@@ -61,13 +36,6 @@ class _CallingScreenState extends State<CallingScreen>
   @override
   void initState() {
     super.initState();
-
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: kPurple,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
 
     // Pulse animation
     _pulseCtrl = AnimationController(
@@ -109,49 +77,57 @@ class _CallingScreenState extends State<CallingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          // Status bar
-          Container(
-            color: kPurple,
-            height: MediaQuery.of(context).padding.top,
-          ),
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-          // ── Main content ──
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
-
-                // ── Avatar with pulsing gradient ring ──
-                _buildPulsingAvatar(),
-
-                const SizedBox(height: 40),
-
-                // ── CALLING......... ──
-                Text(
-                  'CALLING$_dotsText',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 3,
-                  ),
-                ),
-
-                const Spacer(flex: 3),
-
-                // ── Action Buttons ──
-                _buildActionBar(),
-
-                SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
-              ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: kPurple,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Column(
+          children: [
+            // Status bar
+            Container(
+              color: kPurple,
+              height: MediaQuery.of(context).padding.top,
             ),
-          ),
-        ],
+
+            // ── Main content ──
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
+
+                  // ── Avatar with pulsing gradient ring ──
+                  _buildPulsingAvatar(),
+
+                  const SizedBox(height: 40),
+
+                  // ── CALLING......... ──
+                  Text(
+                    'CALLING$_dotsText',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 3,
+                    ),
+                  ),
+
+                  const Spacer(flex: 3),
+
+                  // ── Action Buttons ──
+                  _buildActionBar(isDark),
+
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -217,13 +193,13 @@ class _CallingScreenState extends State<CallingScreen>
   }
 
   // ── Action Bar ────────────────────────────────────────────────
-  Widget _buildActionBar() {
+  Widget _buildActionBar(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: isDark ? const Color(0xFF2A2A2A) : Colors.grey[200],
           borderRadius: BorderRadius.circular(50),
         ),
         child: Row(
@@ -237,13 +213,13 @@ class _CallingScreenState extends State<CallingScreen>
                 height: 56,
                 decoration: BoxDecoration(
                   color: _isMuted
-                      ? Colors.white.withValues(alpha: 0.15)
+                      ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.1))
                       : Colors.transparent,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   _isMuted ? Icons.mic_off : Icons.phone_outlined,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : Colors.black87,
                   size: 26,
                 ),
               ),
@@ -257,7 +233,7 @@ class _CallingScreenState extends State<CallingScreen>
                 height: 56,
                 decoration: BoxDecoration(
                   color: _isVideoOff
-                      ? Colors.white.withValues(alpha: 0.15)
+                      ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.1))
                       : Colors.transparent,
                   shape: BoxShape.circle,
                 ),
@@ -265,7 +241,7 @@ class _CallingScreenState extends State<CallingScreen>
                   _isVideoOff
                       ? Icons.videocam_off_outlined
                       : Icons.videocam_outlined,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : Colors.black87,
                   size: 26,
                 ),
               ),

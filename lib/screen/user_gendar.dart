@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gender Selection',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: const GenderScreen(),
-    );
-  }
-}
-
 class GenderScreen extends StatefulWidget {
   const GenderScreen({super.key});
 
@@ -61,8 +40,11 @@ class _GenderScreenState extends State<GenderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +61,7 @@ class _GenderScreenState extends State<GenderScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? Colors.grey[900] : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -91,8 +73,8 @@ class _GenderScreenState extends State<GenderScreen> {
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.maybePop(context),
-                      icon: const Icon(Icons.arrow_back_ios,
-                          color: Colors.black87, size: 18),
+                      icon: Icon(Icons.arrow_back_ios,
+                          color: textColor, size: 18),
                       padding: EdgeInsets.zero,
                     ),
                   ),
@@ -119,12 +101,12 @@ class _GenderScreenState extends State<GenderScreen> {
             const SizedBox(height: 48),
 
             // "I am a" Title
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
                 'I am a',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: isDark ? Colors.white : Colors.black,
                   fontSize: 36,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.2,
@@ -149,6 +131,8 @@ class _GenderScreenState extends State<GenderScreen> {
                       label: label,
                       isSelected: isSelected,
                       hasArrow: hasArrow,
+                      textColor: textColor,
+                      isDark: isDark,
                       onTap: () {
                         setState(() {
                           _selectedGender = label;
@@ -200,6 +184,8 @@ class _GenderScreenState extends State<GenderScreen> {
     required String label,
     required bool isSelected,
     required bool hasArrow,
+    required Color textColor,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -209,10 +195,10 @@ class _GenderScreenState extends State<GenderScreen> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? primaryRed : Colors.white,
+          color: isSelected ? primaryRed : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? primaryRed : Colors.grey.shade200,
+            color: isSelected ? primaryRed : (isDark ? Colors.white12 : Colors.grey.shade200),
             width: 1.5,
           ),
           boxShadow: isSelected
@@ -231,7 +217,7 @@ class _GenderScreenState extends State<GenderScreen> {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected ? Colors.white : textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.2,
@@ -244,7 +230,7 @@ class _GenderScreenState extends State<GenderScreen> {
                   : Icons.check,
               color: isSelected
                   ? Colors.white
-                  : Colors.grey.shade400,
+                  : (isDark ? Colors.white38 : Colors.grey.shade400),
               size: hasArrow ? 16 : 20,
             ),
           ],

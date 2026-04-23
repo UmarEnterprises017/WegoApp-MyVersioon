@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Image.network(
                       'https://i.pravatar.cc/200?img=8',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Center(
+                      errorBuilder: (_, _, _) => const Center(
                         child: Text(
                           'J',
                           style: TextStyle(

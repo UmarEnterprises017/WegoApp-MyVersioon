@@ -1,119 +1,118 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LogoutScreen extends StatefulWidget {
+  const LogoutScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const ProfileScreen(),
-    );
-  }
+  State<LogoutScreen> createState() => _LogoutScreenState();
 }
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  // Background color from the screenshot
-  static const Color bgColor = Color(0xFF7B9EF0);
-  static const Color iconBgColor = Color(0xFF6B8EE0);
-  static const Color primaryBlue = Color(0xFF2D5BE3);
+class _LogoutScreenState extends State<LogoutScreen> {
+  static const Color primaryBlue = Color(0xFF4A6CF7);
+  static const Color accentPink = Color(0xFFDD2A7B);
 
   void _showLogoutDialog(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Container(
-              width: 40,
-              height: 4,
+              width: 50,
+              height: 5,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                color: isDark ? Colors.white12 : Colors.grey[300],
+                borderRadius: BorderRadius.circular(10),
               ),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.logout_rounded, color: Colors.red, size: 32),
             ),
             const SizedBox(height: 20),
             Text(
               'Logout',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: primaryBlue,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'are you sure you want to log out?',
+            const SizedBox(height: 12),
+            Text(
+              'Are you sure you want to log out from your account?',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
+                fontSize: 15,
+                color: isDark ? Colors.white60 : Colors.black54,
+                height: 1.5,
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 32),
             Row(
               children: [
-                // Cancel button
                 Expanded(
-                  child: OutlinedButton(
+                  child: TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE8EDFF),
-                      side: BorderSide.none,
+                    style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: primaryBlue,
+                        color: isDark ? Colors.white70 : Colors.black54,
                         fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                        fontSize: 16,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Yes, Logout button
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pop(ctx);
-                      // Add your logout logic here
+                      // Add logout logic here
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBlue,
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 0,
                     ),
                     child: const Text(
                       'Yes, Logout',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -128,128 +127,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color subTextColor = isDark ? Colors.white60 : Colors.black45;
+
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FE),
       body: SafeArea(
         child: Column(
           children: [
-            // ─── Top Bar ───────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Icon(
-                      Icons.chevron_left,
-                      color: primaryBlue,
-                      size: 28,
-                    ),
-                  ),
-                  const Text(
-                    'My Profile',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: primaryBlue,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // ─── Custom App Bar ────────────────────────────────
+            _buildAppBar(textColor),
 
-            const SizedBox(height: 12),
-
-            // ─── Avatar ────────────────────────────────────────
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                CircleAvatar(
-                  radius: 52,
-                  backgroundImage: const NetworkImage(
-                    'https://randomuser.me/api/portraits/men/32.jpg',
-                  ),
-                  backgroundColor: Colors.grey[300],
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: primaryBlue,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-
-            // ─── Name ──────────────────────────────────────────
-            const Text(
-              'John Doe',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-
-            const SizedBox(height: 28),
-
-            // ─── Menu Items ────────────────────────────────────
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: [
-                  _buildMenuItem(Icons.person_outline, 'Profile'),
-                  _buildMenuItem(Icons.favorite_border, 'Favourite'),
-                  _buildMenuItem(Icons.wallet_outlined, 'Payment Method'),
-                  _buildMenuItem(Icons.lock_outline, 'Privacy Policy'),
-                  _buildMenuItem(Icons.settings_outlined, 'Settings'),
-                  _buildMenuItem(Icons.help_outline, 'Help'),
-                  const SizedBox(height: 20),
-                  // Logout trigger row (optional, if you want a logout menu item too)
-                ],
-              ),
-            ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    // ─── Profile Header ──────────────────────────
+                    _buildProfileHeader(isDark, textColor, subTextColor),
+                    
+                    const SizedBox(height: 32),
 
-            // ─── Logout Button (triggers bottom sheet) ─────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: GestureDetector(
-                onTap: () => _showLogoutDialog(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Logout',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+                    // ─── Menu Sections ───────────────────────────
+                    _buildMenuSection(
+                      context,
+                      'Account Settings',
+                      [
+                        _MenuItemData(Icons.person_outline_rounded, 'Personal Profile', 'Manage your info'),
+                        _MenuItemData(Icons.favorite_outline_rounded, 'My Favorites', 'People you liked'),
+                        _MenuItemData(Icons.account_balance_wallet_outlined, 'Payment Methods', 'Subscriptions & cards'),
+                      ],
+                      isDark,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    _buildMenuSection(
+                      context,
+                      'Preferences',
+                      [
+                        _MenuItemData(Icons.lock_outline_rounded, 'Privacy & Policy', 'Secure your account'),
+                        _MenuItemData(Icons.settings_outlined, 'App Settings', 'Themes & notifications'),
+                        _MenuItemData(Icons.help_outline_rounded, 'Help Center', 'FAQs & support'),
+                      ],
+                      isDark,
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // ─── Logout Button ───────────────────────────
+                    _buildLogoutButton(),
+                    
+                    const SizedBox(height: 30),
+                  ],
                 ),
               ),
             ),
@@ -259,39 +191,269 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
+  Widget _buildAppBar(Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
+            color: primaryBlue,
+            onPressed: () => Navigator.maybePop(context),
+          ),
+          Text(
+            'Settings',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(width: 48), // Spacer for balance
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(bool isDark, Color textColor, Color subTextColor) {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [primaryBlue, accentPink],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryBlue.withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(3),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(2),
+                child: const CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage(
+                    'https://randomuser.me/api/portraits/men/32.jpg',
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryBlue,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: isDark ? const Color(0xFF121212) : Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 16),
+        Text(
+          'John Doe',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'johndoe.match@email.com',
+          style: TextStyle(
+            fontSize: 14,
+            color: subTextColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuSection(BuildContext context, String title, List<_MenuItemData> items, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+          child: Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: primaryBlue.withValues(alpha: 0.8),
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+            ],
+          ),
+          child: Column(
+            children: List.generate(items.length, (index) {
+              final item = items[index];
+              return Column(
+                children: [
+                  _buildMenuItem(
+                    item.icon,
+                    item.label,
+                    item.subtitle,
+                    isDark ? Colors.white : Colors.black87,
+                  ),
+                  if (index != items.length - 1)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 64, right: 20),
+                      child: Divider(
+                        height: 1,
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey[100],
+                      ),
+                    ),
+                ],
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String label, String subtitle, Color textColor) {
+    return InkWell(
+      onTap: () {},
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
             Container(
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: iconBgColor,
+                color: primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: Colors.white, size: 22),
+              child: Icon(icon, color: primaryBlue, size: 22),
             ),
             const SizedBox(width: 16),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: textColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: textColor.withValues(alpha: 0.2),
+              size: 16,
+            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildLogoutButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GestureDetector(
+        onTap: () => _showLogoutDialog(context),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.redAccent.withValues(alpha: 0.1), Colors.red.withValues(alpha: 0.05)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.power_settings_new_rounded, color: Colors.redAccent, size: 22),
+              const SizedBox(width: 12),
+              const Text(
+                'Sign Out',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuItemData {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+
+  _MenuItemData(this.icon, this.label, this.subtitle);
 }
