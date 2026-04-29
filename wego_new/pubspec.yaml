@@ -1,0 +1,47 @@
+name: wego_marriage
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  font_awesome_flutter: ^10.7.0
+
+  cupertino_icons: ^1.0.8
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.5.0
+  flutter_facebook_auth: ^7.0.1
+  local_auth: ^2.3.0
+  google_sign_in: ^6.2.1
+  image_picker: ^1.1.2
+  permission_handler: ^11.3.1
+  video_player: ^2.9.2
+  share_plus: ^10.1.2
+  timeago: ^3.6.1
+  gal: ^2.3.0
+  file_picker: ^8.1.4
+  camera: ^0.10.5+9
+  audioplayers: ^6.1.0
+  path_provider: ^2.1.4
+  http: ^1.2.2
+  shared_preferences: ^2.5.3
+  provider: ^6.1.2
+  cloud_firestore: ^5.6.0
+  flutter_webrtc: ^0.13.0
+  firebase_storage: ^12.4.10
+firebase_storage: ^12.3.0
+dependency_overrides:
+  flutter_webrtc: ^0.13.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

@@ -45,7 +45,7 @@ dependencies:
   share_plus: ^10.1.4
   timeago: ^3.6.1
 
-  image_gallery_saver: ^2.0.3
+  image_gallery_saver_plus: ^4.0.1
 
   http: ^1.2.0
 dev_dependencies:

@@ -1,0 +1,153 @@
+Widget _buildVoicePreviewBar(bool isDark) {
+  return Container(
+    color: isDark ? const Color(0xFF1E1E2E) : Colors.grey[100],
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Preview header
+        Row(
+          children: [
+            const Icon(Icons.audiotrack, color: kPurple, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Voice Message Preview',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: _cancelVoicePreview,
+              icon: const Icon(Icons.close, color: Colors.grey),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Voice preview player
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.black26 : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              // Play/Pause button
+              GestureDetector(
+                onTap: _toggleVoicePreview,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: kPurple,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _isPreviewPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Duration and waveform
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _formatDuration(_recordingDuration),
+                      style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      height: 20,
+                      child: CustomPaint(
+                        painter: _WaveformPainter(
+                          isPlaying: _isPreviewPlaying,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Action buttons
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _cancelVoicePreview,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.grey),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _sendVoiceMessage,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPurple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text('Send', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+// ── Waveform Painter for Voice Preview ───────────────────────────────
+class _WaveformPainter extends CustomPainter {
+  final bool isPlaying;
+  final Color color;
+
+  _WaveformPainter({
+    required this.isPlaying,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.3)
+      ..strokeWidth = 2;
+
+    final barCount = 20;
+    final barWidth = size.width / barCount;
+    
+    for (int i = 0; i < barCount; i++) {
+      final barHeight = (i % 3 + 1) * 4.0;
+      final x = i * barWidth + barWidth / 2;
+      final y = (size.height - barHeight) / 2;
+      
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x, y + barHeight),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}

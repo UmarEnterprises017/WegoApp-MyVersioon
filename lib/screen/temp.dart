@@ -1,13 +1,22 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import 'dart:async';
+import 'package:provider/provider.dart';
+import 'package:wego_marriage/providers/chat_provider.dart';
+import 'package:wego_marriage/services/local_storage_service.dart';
 
-// â”€â”€ Colors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+// ── Colors ────────────────────────────────────────────────────
 const Color kPurple = Color(0xFF6B4EFF);
 const Color kTeal = Color(0xFF2EC4B6);
 
-// â”€â”€ Message Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Message Status ─────────────────────────────────────────────
 enum MsgStatus { sent, delivered, seen }
 
-// â”€â”€ Message Model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Message Model ─────────────────────────────────────────────
 enum MsgType { text, image, sticker, voice, document, video, gif, linkPreview }
 
 class ChatMessage {
@@ -151,7 +160,7 @@ class ChatMessage {
   }
 }
 
-// â”€â”€ Chat Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Chat Screen ───────────────────────────────────────────────
 class ChatScreen extends StatefulWidget {
   final String username;
   final String avatarUrl;
@@ -214,7 +223,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   String _selectedBubbleStyle = 'default';
   bool _isVIP = false;
 
-  final List<String> _quickReactions = ['â¤ï¸', 'ðŸ˜‚', 'ðŸ˜®', 'ðŸ˜¢', 'ðŸ™', 'ðŸ‘'];
+  final List<String> _quickReactions = ['❤️', '😂', '😮', '😢', '🙏', '👍'];
 
   final List<Map<String, dynamic>> _stickerCategories = [
     {
@@ -273,56 +282,56 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     {
       'icon': Icons.access_time_rounded,
       'name': 'Recent',
-      'emojis': ['ðŸ˜€', 'ðŸ˜', 'ðŸ˜‚', 'ðŸ”¥', 'â¤ï¸', 'ðŸ‘', 'ðŸ™', 'ðŸ™Œ', 'âœ¨', 'ðŸŽ‰']
+      'emojis': ['😀', '😍', '😂', '🔥', '❤️', '👍', '🙏', '🙌', '✨', '🎉']
     },
     {
       'icon': Icons.emoji_emotions_outlined,
       'name': 'Smileys',
       'emojis': [
-        'ðŸ˜€','ðŸ˜ƒ','ðŸ˜„','ðŸ˜','ðŸ˜†','ðŸ˜…','ðŸ¤£','ðŸ˜‚','ðŸ™‚','ðŸ™ƒ','ðŸ˜‰','ðŸ˜Š','ðŸ˜‡',
-        'ðŸ¥°','ðŸ˜','ðŸ¤©','ðŸ˜˜','ðŸ˜—','ðŸ˜š','ðŸ˜™','ðŸ˜‹','ðŸ˜›','ðŸ˜œ','ðŸ¤ª','ðŸ˜','ðŸ¤‘',
-        'ðŸ¤—','ðŸ¤­','ðŸ¤«','ðŸ¤”','ðŸ¤','ðŸ¤¨','ðŸ˜','ðŸ˜‘','ðŸ˜¶','ðŸ˜','ðŸ˜’','ðŸ™„','ðŸ˜¬',
-        'ðŸ¤¥','ðŸ˜Œ','ðŸ˜”','ðŸ˜ª','ðŸ¤¤','ðŸ˜´','ðŸ˜·','ðŸ¤’','ðŸ¤•','ðŸ¤¢','ðŸ¤®','ðŸ¤§','ðŸ¥µ',
-        'ðŸ¥¶','ðŸ¥´','ðŸ˜µ','ðŸ¤¯','ðŸ¤ ','ðŸ¥³','ðŸ˜Ž','ðŸ¤“','ðŸ§','ðŸ˜•','ðŸ˜Ÿ','ðŸ™','â˜¹ï¸',
-        'ðŸ˜®','ðŸ˜¯','ðŸ˜²','ðŸ˜³','ðŸ¥º','ðŸ˜¦','ðŸ˜§','ðŸ˜¨','ðŸ˜°','ðŸ˜¥','ðŸ˜¢','ðŸ˜­','ðŸ˜±',
-        'ðŸ˜–','ðŸ˜£','ðŸ˜ž','ðŸ˜“','ðŸ˜©','ðŸ˜«','ðŸ¥±','ðŸ˜¤','ðŸ˜¡','ðŸ˜ ','ðŸ¤¬','ðŸ˜ˆ','ðŸ‘¿',
-        'ðŸ’€','â˜ ï¸','ðŸ’©','ðŸ¤¡','ðŸ‘¹','ðŸ‘º','ðŸ‘»','ðŸ‘½','ðŸ‘¾','ðŸ¤–'
+        '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇',
+        '🥰','😍','🤩','😘','😗','😚','😙','😋','😛','😜','🤪','😝','🤑',
+        '🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬',
+        '🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵',
+        '🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','☹️',
+        '😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱',
+        '😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿',
+        '💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖'
       ]
     },
     {
       'icon': Icons.pets_outlined,
       'name': 'Animals',
       'emojis': [
-        'ðŸ¶','ðŸ±','ðŸ­','ðŸ¹','ðŸ°','ðŸ¦Š','ðŸ»','ðŸ¼','ðŸ¨','ðŸ¯','ðŸ¦','ðŸ®','ðŸ·',
-        'ðŸ¸','ðŸµ','ðŸ”','ðŸ§','ðŸ¦','ðŸ¤','ðŸ¦†','ðŸ¦…','ðŸ¦‰','ðŸ¦‡','ðŸº','ðŸ—','ðŸ´',
-        'ðŸ¦„','ðŸ','ðŸ›','ðŸ¦‹','ðŸŒ','ðŸž','ðŸœ','ðŸ¦Ÿ','ðŸ¦—','ðŸ•·ï¸','ðŸ•¸ï¸','ðŸ¦‚','ðŸ¢',
-        'ðŸ','ðŸ¦Ž'
+        '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷',
+        '🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴',
+        '🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🕸️','🦂','🐢',
+        '🐍','🦎'
       ]
     },
     {
       'icon': Icons.fastfood_outlined,
       'name': 'Food',
       'emojis': [
-        'ðŸŽ','ðŸ','ðŸŠ','ðŸ‹','ðŸŒ','ðŸ‰','ðŸ‡','ðŸ“','ðŸˆ','ðŸ’','ðŸ‘','ðŸ¥­','ðŸ',
-        'ðŸ¥¥','ðŸ¥','ðŸ…','ðŸ†','ðŸ¥‘','ðŸ¥¦','ðŸŒ½','ðŸ”','ðŸŸ','ðŸ•','ðŸŒ®','ðŸŒ¯','ðŸ',
-        'ðŸœ','ðŸ›','ðŸ£','ðŸ±','ðŸ¥Ÿ','ðŸ¤','ðŸ¦','ðŸ§','ðŸ°','ðŸŽ‚','ðŸ­','ðŸ¬','ðŸ«',
-        'ðŸ¿','ðŸ©','ðŸª','â˜•','ðŸµ','ðŸ¥¤','ðŸº','ðŸ»','ðŸ¥‚','ðŸ·'
+        '🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍈','🍒','🍑','🥭','🍍',
+        '🥥','🥝','🍅','🍆','🥑','🥦','🌽','🍔','🍟','🍕','🌮','🌯','🍝',
+        '🍜','🍛','🍣','🍱','🥟','🍤','🍦','🧁','🍰','🎂','🍭','🍬','🍫',
+        '🍿','🍩','🍪','☕','🍵','🥤','🍺','🍻','🥂','🍷'
       ]
     },
     {
       'icon': Icons.sports_soccer_rounded,
       'name': 'Activities',
       'emojis': [
-        'âš½','ðŸ€','ðŸˆ','âš¾','ðŸ¥Ž','ðŸŽ¾','ðŸ','ðŸ‰','ðŸŽ±','ðŸ“','ðŸ¸','ðŸ¥Š','ðŸ¥‹',
-        'ðŸŽ½','ðŸ›¹','â›·ï¸','ðŸ‚','ðŸ‹ï¸','ðŸ¤¸','â›¹ï¸','ðŸ„','ðŸŠ','ðŸ¤½','ðŸš´','ðŸšµ'
+        '⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🎱','🏓','🏸','🥊','🥋',
+        '🎽','🛹','⛷️','🏂','🏋️','🤸','⛹️','🏄','🏊','🤽','🚴','🚵'
       ]
     },
     {
       'icon': Icons.directions_car_filled_outlined,
       'name': 'Travel',
       'emojis': [
-        'ðŸš—','ðŸš•','ðŸš™','ðŸšŒ','ðŸšŽ','ðŸŽï¸','ðŸš“','ðŸš‘','ðŸš’','ðŸš','ðŸšš','ðŸš›','ðŸšœ',
-        'ðŸ›µ','ðŸï¸','ðŸš²','âœˆï¸','ðŸš€','â›µ','âš“'
+        '🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🚚','🚛','🚜',
+        '🛵','🏍️','🚲','✈️','🚀','⛵','⚓'
       ]
     },
   ];
@@ -365,7 +374,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
   }
 
-  // â”€â”€ Load favorite stickers from persistent storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Load favorite stickers from persistent storage ──────────
   void _loadFavoriteStickers() {
     final favs = _storage.getFavoriteStickers(widget.username);
     if (favs.isNotEmpty) {
@@ -429,7 +438,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           time: '9:42 AM',
           dateTime: DateTime.now().subtract(const Duration(hours: 1, minutes: 58))),
       ChatMessage(
-          text: "Sticker ðŸ˜",
+          text: "Sticker 😍",
           isMine: false,
           type: MsgType.sticker,
           imageUrl: 'https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif',
@@ -456,11 +465,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       } else if (lastMsg.type == MsgType.text) {
         displayMsg = lastMsg.isMine ? "You: ${lastMsg.text}" : lastMsg.text!;
       } else if (lastMsg.type == MsgType.sticker) {
-        displayMsg = "Sticker ðŸ˜";
+        displayMsg = "Sticker 😍";
       } else if (lastMsg.type == MsgType.voice) {
-        displayMsg = "Voice Message ðŸŽ¤";
+        displayMsg = "Voice Message 🎤";
       } else if (lastMsg.type == MsgType.image) {
-        displayMsg = "Photo ðŸ“·";
+        displayMsg = "Photo 📷";
       } else if (lastMsg.type == MsgType.gif) {
         displayMsg = "GIF";
       }
@@ -541,7 +550,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
   }
 
-  // â”€â”€ Long Press â†’ Message Options Popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Long Press → Message Options Popup ──────────────────────
   void _showMessageOptions(BuildContext context, int messageIndex) {
     HapticFeedback.mediumImpact();
     final msg = _messages[messageIndex];
@@ -704,7 +713,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-  // â”€â”€ Delete / Unsend dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Delete / Unsend dialog ───────────────────────────────────
   void _showDeleteOptions(BuildContext context, int index, ChatMessage msg) {
     showDialog(
       context: context,
@@ -790,17 +799,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-  // â”€â”€ Message Info Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Message Info Screen ──────────────────────────────────────
   void _showMessageInfo(BuildContext context, ChatMessage msg) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => MessageInfoScreen(message: msg, peerName: widget.username, peerAvatar: widget.avatarUrl)));
   }
 
-  // â”€â”€ Forward Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Forward Screen ───────────────────────────────────────────
   void _openForwardScreen(BuildContext context, ChatMessage msg) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => ForwardMessageScreen(message: msg)));
   }
 
-  // â”€â”€ Full Emoji Reaction Picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Full Emoji Reaction Picker ───────────────────────────────
   void _showFullEmojiReactionPicker(BuildContext context, int messageIndex) {
     showModalBottomSheet(
       context: context,
@@ -856,7 +865,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _saveToStorage();
   }
 
-  // â”€â”€ Save Image/Video to Gallery â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Save Image/Video to Gallery ──────────────────────────────
   Future<void> _saveMediaToGallery(String url, bool isVideo) async {
     try {
       PermissionStatus status;
@@ -871,11 +880,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       }
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isVideo ? 'Saving video...' : 'Saving image...')));
       final response = await http.get(Uri.parse(url));
-      final result = await ImageGallerySaver.saveImage(response.bodyBytes, quality: 100, name: 'wego_${DateTime.now().millisecondsSinceEpoch}');
+      final Map result = await ImageGallerySaverPlus.saveImage(
+          response.bodyBytes,
+          name: "${DateTime.now().millisecondsSinceEpoch}");
       if (mounted) {
         final bool success = result['isSuccess'] ?? false;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(success ? (isVideo ? 'Video saved to gallery! ðŸŽ¬' : 'Image saved to gallery! ðŸ“¸') : 'Failed to save. Try again.'),
+          content: Text(success ? (isVideo ? 'Video saved to gallery! 🎬' : 'Image saved to gallery! 📸') : 'Failed to save. Try again.'),
           backgroundColor: success ? Colors.green : Colors.red,
         ));
       }
@@ -884,7 +895,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
   }
 
-  // â”€â”€ Sticker Long Press Popup (received) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Sticker Long Press Popup (received) ─────────────────────
   void _showReceivedStickerPopup(BuildContext context, String stickerUrl) {
     showModalBottomSheet(
       context: context,
@@ -958,7 +969,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       setState(() {
         (_stickerCategories[0]['stickers'] as List).add(stickerUrl);
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('â­ Sticker added to Favorites!'), backgroundColor: Color(0xFFFFC107), duration: Duration(seconds: 2)));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('⭐ Sticker added to Favorites!'), backgroundColor: Color(0xFFFFC107), duration: Duration(seconds: 2)));
     }
     _saveToStorage();
   }
@@ -967,7 +978,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     Navigator.push(context, MaterialPageRoute(builder: (_) => StickerEditorScreen(stickerUrl: stickerUrl)));
   }
 
-  // â”€â”€ 3-Dot Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── 3-Dot Menu ───────────────────────────────────────────────
   void _show3DotMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -1181,7 +1192,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-  // â”€â”€ Voice Recording â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Voice Recording ──────────────────────────────────────────
   void _startRecording() {
     setState(() {
       _isRecording = true;
@@ -1220,7 +1231,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     return '$m:$s';
   }
 
-  // â”€â”€ Panel Builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Panel Builder ────────────────────────────────────────────
   Widget _buildWhatsAppPanel() {
     return Container(
       height: 320,
@@ -1458,7 +1469,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-  // â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Build ────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1875,7 +1886,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 }
 
-// â”€â”€ Reply Header Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Reply Header Widget ───────────────────────────────────────
 class _ReplyHeader extends StatelessWidget {
   final String text;
   final bool isMine;
@@ -1903,7 +1914,7 @@ class _ReplyHeader extends StatelessWidget {
   }
 }
 
-// â”€â”€ Reaction Row Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Reaction Row Widget ───────────────────────────────────────
 class _ReactionRow extends StatelessWidget {
   final Map<String, List<String>> reactions;
   final bool isMine;
@@ -1941,7 +1952,7 @@ class _ReactionRow extends StatelessWidget {
   }
 }
 
-// â”€â”€ Sticker Action Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Sticker Action Button ─────────────────────────────────────
 class _StickerActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -1972,7 +1983,7 @@ class _StickerActionButton extends StatelessWidget {
   }
 }
 
-// â”€â”€ Action Tile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Action Tile ───────────────────────────────────────────────
 class _ActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1992,7 +2003,7 @@ class _ActionTile extends StatelessWidget {
   }
 }
 
-// â”€â”€ Settings Tile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Settings Tile ─────────────────────────────────────────────
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -2012,7 +2023,7 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-// â”€â”€ VIP Badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── VIP Badge ─────────────────────────────────────────────────
 class _VIPBadge extends StatelessWidget {
   const _VIPBadge();
   @override
@@ -2026,7 +2037,7 @@ class _VIPBadge extends StatelessWidget {
   }
 }
 
-// â”€â”€ Deleted / Unsent Bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Deleted / Unsent Bubble ───────────────────────────────────
 class _DeletedBubble extends StatelessWidget {
   final bool isMine;
   final String time;
@@ -2093,7 +2104,7 @@ class _UnsentBubble extends StatelessWidget {
   }
 }
 
-// â”€â”€ My Bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── My Bubble ─────────────────────────────────────────────────
 class _MyBubble extends StatelessWidget {
   final ChatMessage message;
   final VoidCallback onLongPress;
@@ -2186,7 +2197,7 @@ class _MyBubble extends StatelessWidget {
   }
 }
 
-// â”€â”€ Voice Bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Voice Bubble ──────────────────────────────────────────────
 class _VoiceBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isMine;
@@ -2215,7 +2226,7 @@ class _VoiceBubble extends StatelessWidget {
   }
 }
 
-// â”€â”€ Their Text Bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Their Text Bubble ─────────────────────────────────────────
 class _TheirTextBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isDark;
@@ -2324,7 +2335,7 @@ class _TheirImageMessage extends StatelessWidget {
   }
 }
 
-// â”€â”€ Save Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Save Button ───────────────────────────────────────────────
 class _SaveButton extends StatelessWidget {
   final VoidCallback onSave;
   const _SaveButton({required this.onSave});
@@ -2354,7 +2365,7 @@ class _SaveButton extends StatelessWidget {
   }
 }
 
-// â”€â”€ Waveform Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Waveform Widget ───────────────────────────────────────────
 class _WaveformWidget extends StatefulWidget {
   final bool isMini;
   const _WaveformWidget({this.isMini = false});
@@ -2395,7 +2406,7 @@ class _WaveformWidgetState extends State<_WaveformWidget> with SingleTickerProvi
   }
 }
 
-// â”€â”€ Typing Dot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Typing Dot ────────────────────────────────────────────────
 class _TypingDot extends StatefulWidget {
   final int delay;
   const _TypingDot({required this.delay});
@@ -2430,7 +2441,7 @@ class _TypingDotState extends State<_TypingDot> with SingleTickerProviderStateMi
   }
 }
 
-// â”€â”€ Message Info Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Message Info Screen ───────────────────────────────────────
 class MessageInfoScreen extends StatelessWidget {
   final ChatMessage message;
   final String peerName;
@@ -2467,7 +2478,7 @@ class MessageInfoScreen extends StatelessWidget {
                     Text(message.text!, style: const TextStyle(fontSize: 15)),
                   const SizedBox(height: 8),
                   Text(
-                    '${_msgTypeLabel(message.type)} â€¢ ${message.isMine ? "Sent" : "Received"}',
+                    '${_msgTypeLabel(message.type)} • ${message.isMine ? "Sent" : "Received"}',
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ],
@@ -2500,9 +2511,9 @@ class MessageInfoScreen extends StatelessWidget {
 
   String _statusLabel(MsgStatus s) {
     switch (s) {
-      case MsgStatus.sent: return 'Sent âœ“';
-      case MsgStatus.delivered: return 'Delivered âœ“âœ“';
-      case MsgStatus.seen: return 'Seen âœ“âœ“';
+      case MsgStatus.sent: return 'Sent ✓';
+      case MsgStatus.delivered: return 'Delivered ✓✓';
+      case MsgStatus.seen: return 'Seen ✓✓';
     }
   }
 }
@@ -2532,7 +2543,7 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// â”€â”€ Forward Message Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Forward Message Screen ────────────────────────────────────
 class ForwardMessageScreen extends StatefulWidget {
   final ChatMessage message;
   const ForwardMessageScreen({super.key, required this.message});
@@ -2621,7 +2632,7 @@ class _ForwardMessageScreenState extends State<ForwardMessageScreen> {
   }
 }
 
-// â”€â”€ Sticker Editor Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Sticker Editor Screen ─────────────────────────────────────
 class StickerEditorScreen extends StatefulWidget {
   final String stickerUrl;
   const StickerEditorScreen({super.key, required this.stickerUrl});
@@ -2726,7 +2737,7 @@ class _StickerEditorScreenState extends State<StickerEditorScreen> {
   }
 }
 
-// â”€â”€ Voice Call Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Voice Call Screen ─────────────────────────────────────────
 class VoiceCallScreen extends StatefulWidget {
   final String username;
   final String avatarUrl;
@@ -2912,7 +2923,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> {
   }
 }
 
-// â”€â”€ Video Call Screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Video Call Screen ─────────────────────────────────────────
 class VideoCallScreen extends StatefulWidget {
   final String username;
   final String avatarUrl;
@@ -3089,7 +3100,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 }
 
-// â”€â”€ Call Button Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Call Button Widgets ───────────────────────────────────────
 class _CallButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
