@@ -71,7 +71,7 @@ class _HomeFeedScreenState extends State<HomeFeedScreen> {
 
     final List<Map<String, dynamic>> items = [
       {'icon': Icons.home_rounded, 'label': 'Home'},
-      {'icon': Icons.bookmark_border, 'label': 'favorite'},
+      {'icon': Icons.bookmark_border, 'label': 'Match'},
       {'icon': null, 'label': ''},
       {'icon': Icons.chat_bubble_outline, 'label': 'Chats'},
       {'icon': Icons.person_outline, 'label': 'Profile'},
