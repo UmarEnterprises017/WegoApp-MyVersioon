@@ -30,6 +30,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   final LocalAuthentication _localAuth = LocalAuthentication();
 
+  // ─── Suggested / Search State ────────────────────────────────
+  List<Map<String, dynamic>> _suggestedUsers = [];
+  List<Map<String, dynamic>> _liveSuggestions = [];
+  List<Map<String, dynamic>> _searchResults = [];
+
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -57,10 +62,55 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
+  // ══════════════════════════════════════════════════════════════
+  // ✅ NEW: Migrate user from old 'user' collection to 'users'
+  // ══════════════════════════════════════════════════════════════
+  Future<void> _migrateUserIfNeeded(String uid) async {
+    try {
+      // Check karo 'users' mein hai ya nahi
+      final newDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      if (!newDoc.exists) {
+        // Purani 'user' collection se data lo
+        final oldDoc = await FirebaseFirestore.instance
+            .collection('user') // singular — purani collection
+            .doc(uid)
+            .get();
+
+        if (oldDoc.exists) {
+          final data = oldDoc.data()!;
+          final fullName = data['fullName'] ?? '';
+
+          // Naye 'users' collection mein save karo
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .set({
+            ...data,
+            'username': fullName,
+            'username_lower': fullName.toString().toLowerCase(),
+            'uid': uid,
+          }, SetOptions(merge: true));
+
+          debugPrint('✅ User migrated: $uid');
+        } else {
+          debugPrint('ℹ️ No old data found for uid: $uid');
+        }
+      } else {
+        debugPrint('ℹ️ User already in new collection: $uid');
+      }
+    } catch (e) {
+      debugPrint('Migration error: $e');
+    }
+  }
+
   Future<bool> _checkUserExistsInFirestore(String uid) async {
     try {
       final docSnap = await FirebaseFirestore.instance
-          .collection('user')
+          .collection('users')
           .doc(uid)
           .get();
       return docSnap.exists;
@@ -109,7 +159,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  // ✅ UPDATED: username aur username_lower fields add ho gayi
+  // ─── Save User to Firestore ──────────────────────────────────
   Future<bool> _saveUserToFirestore({
     required String uid,
     required String fullName,
@@ -121,12 +171,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }) async {
     try {
       final username = fullName.trim();
-      final usernameLower = username.toLowerCase(); // ← Search ke liye
+      final usernameLower = username.toLowerCase();
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set({
         'fullName': fullName,
-        'username': username,               // ← Search mein dikhega
-        'username_lower': usernameLower,    // ← Search query ke liye
+        'username': username,
+        'username_lower': usernameLower,
         'email': email,
         'mobileNumber': mobileNumber,
         'dateOfBirth': dateOfBirth,
@@ -141,6 +194,88 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     } catch (e) {
       _showError('Failed to save data: ${e.toString()}');
       return false;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // Suggested Users
+  // ══════════════════════════════════════════════════════════════
+  Future<void> _fetchSuggestedUsers() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .orderBy('createdAt', descending: true)
+          .limit(10)
+          .get();
+
+      if (!mounted) return;
+      setState(() {
+        _suggestedUsers = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+      });
+    } catch (e) {
+      debugPrint('fetchSuggestedUsers error: $e');
+    }
+  }
+
+  Future<void> _fetchLiveSuggestions(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() => _liveSuggestions = []);
+      return;
+    }
+
+    try {
+      final lowerQuery = query.trim().toLowerCase();
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username_lower', isGreaterThanOrEqualTo: lowerQuery)
+          .where('username_lower', isLessThan: '${lowerQuery}z')
+          .limit(5)
+          .get();
+
+      if (!mounted) return;
+      setState(() {
+        _liveSuggestions = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+      });
+    } catch (e) {
+      debugPrint('fetchLiveSuggestions error: $e');
+    }
+  }
+
+  Future<void> _performFullSearch(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() => _searchResults = []);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final lowerQuery = query.trim().toLowerCase();
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username_lower', isGreaterThanOrEqualTo: lowerQuery)
+          .where('username_lower', isLessThan: '${lowerQuery}z')
+          .orderBy('username_lower')
+          .limit(20)
+          .get();
+
+      if (!mounted) return;
+      setState(() {
+        _searchResults = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('performFullSearch error: $e');
+      if (!mounted) return;
+      setState(() => _isLoading = false);
     }
   }
 
@@ -175,6 +310,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       final UserCredential userCredential =
       await FirebaseAuth.instance.signInWithCredential(credential);
       final user = userCredential.user!;
+
+      // ✅ Migration check karo login ke baad
+      await _migrateUserIfNeeded(user.uid);
 
       setState(() => _isLoading = false);
 
@@ -275,6 +413,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       final String fbPhoto =
           userData['picture']?['data']?['url'] ?? user.photoURL ?? '';
 
+      // ✅ Migration check karo Facebook login ke baad bhi
+      await _migrateUserIfNeeded(user.uid);
+
       setState(() => _isLoading = false);
 
       final bool alreadyExists = await _checkUserExistsInFirestore(user.uid);
@@ -359,8 +500,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
     final Map<String, dynamic> userInfo = {
       'fullName': fullName,
-      'username': fullName,                        // ← Search ke liye
-      'username_lower': fullName.toLowerCase(),    // ← Search ke liye lowercase
+      'username': fullName,
+      'username_lower': fullName.toLowerCase(),
       'email': _emailController.text.trim(),
       'mobileNumber': phoneNumber,
       'dateOfBirth': _dobController.text.trim(),
