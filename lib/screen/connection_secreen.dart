@@ -1,54 +1,6 @@
 import 'package:flutter/material.dart';
-
-// ─── Data Model ──────────────────────────────────────────────────────────────
-class MatchUser {
-  final String name;
-  final int age;
-  final String imageUrl;
-  final bool hasLiked; // shows red heart badge
-
-  const MatchUser({
-    required this.name,
-    required this.age,
-    required this.imageUrl,
-    this.hasLiked = false,
-  });
-}
-
-// ─── Sample Data ─────────────────────────────────────────────────────────────
-final List<MatchUser> matches = [
-  MatchUser(
-    name: 'Leilani',
-    age: 19,
-    imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400',
-  ),
-  MatchUser(
-    name: 'Annabelle',
-    age: 20,
-    imageUrl: 'https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=400',
-  ),
-  MatchUser(
-    name: 'Reagan',
-    age: 24,
-    imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
-  ),
-  MatchUser(
-    name: 'Hadley',
-    age: 25,
-    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-  ),
-  MatchUser(
-    name: 'Kyle',
-    age: 24,
-    imageUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400',
-  ),
-  MatchUser(
-    name: 'Kyle',
-    age: 24,
-    imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
-    hasLiked: true,
-  ),
-];
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 class MatchesScreen extends StatefulWidget {
@@ -59,7 +11,7 @@ class MatchesScreen extends StatefulWidget {
 }
 
 class _MatchesScreenState extends State<MatchesScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 1; // Default to 'favorite' tab for this screen
 
   static const Color primaryPurple = Color(0xFF6C3FEB);
   static const Color tealGreen = Color(0xFF2DBD9B);
@@ -67,6 +19,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final userProvider = Provider.of<UserProvider>(context);
+    final matches = userProvider.matches;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -116,10 +70,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     border: Border.all(color: primaryPurple, width: 2),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      '1L',
-                      style: TextStyle(
+                      '${matches.length}',
+                      style: const TextStyle(
                         color: primaryPurple,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -133,7 +87,21 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
           // ─── Grid ──────────────────────────────────────────
           Expanded(
-            child: GridView.builder(
+            child: matches.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No matches yet. Keep swiping!',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  ),
+                ],
+              ),
+            )
+                : GridView.builder(
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -249,7 +217,7 @@ class _NavItem extends StatelessWidget {
 
 // ─── Match Card ──────────────────────────────────────────────────────────────
 class _MatchCard extends StatelessWidget {
-  final MatchUser user;
+  final AppProfile user;
 
   const _MatchCard({required this.user});
 
@@ -361,8 +329,8 @@ class _MatchCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.favorite_border,
-                        color: Colors.white,
+                        Icons.favorite,
+                        color: Colors.redAccent,
                         size: 18,
                       ),
                     ),
@@ -372,32 +340,31 @@ class _MatchCard extends StatelessWidget {
             ),
           ),
 
-          // ── Red Heart Badge (top right, if liked) ─────────
-          if (user.hasLiked)
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.favorite,
-                  color: Colors.redAccent,
-                  size: 20,
-                ),
+          // ── Red Heart Badge (top right, always on for mutual matches) ─────────
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.favorite,
+                color: Colors.redAccent,
+                size: 20,
               ),
             ),
+          ),
         ],
       ),
     );

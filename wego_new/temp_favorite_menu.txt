@@ -1,0 +1,15 @@
+﻿                          _buildMenuItem(
+                            context: context,
+                            icon: Icons.favorite_border,
+                            title: 'Favorites',
+                            color: Colors.red,
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MatchesScreen(),
+                                ),
+                              );
+                            },
+                          ),

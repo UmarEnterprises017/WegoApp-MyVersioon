@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "800398940290",
+    "project_id": "wego-talk",
+    "storage_bucket": "wego-talk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800398940290:android:a8ad2b91352cffd5323c9b",
+        "android_client_info": {
+          "package_name": "com.chines.wego_talk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "800398940290-5e9ouitem00r6j5ksffa7o2ctm4edkmb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chines.wego_talk",
+            "certificate_hash": "3fc8c1b3e4973258e2af84f9ed03272e8610716c"
+          }
+        },
+        {
+          "client_id": "800398940290-4amtkl1ogm6p4kejfb09tm6u4if60uej.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlkJmCmx04ceSj_rPYFoDIKQkwN6KEoT8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "800398940290-4amtkl1ogm6p4kejfb09tm6u4if60uej.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "800398940290-e51m6v7j0mlr7enihr5p3pnj5brg0ill.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.wegoMarriage"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800398940290:android:995b186ddb3738c6323c9b",
+        "android_client_info": {
+          "package_name": "com.chinese.wego_talk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "800398940290-4amtkl1ogm6p4kejfb09tm6u4if60uej.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlkJmCmx04ceSj_rPYFoDIKQkwN6KEoT8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "800398940290-4amtkl1ogm6p4kejfb09tm6u4if60uej.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "800398940290-e51m6v7j0mlr7enihr5p3pnj5brg0ill.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.wegoMarriage"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

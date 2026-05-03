@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import 'match_screen.dart';
 
 // ── Colors ───────────────────────────────────────────────────
 const Color kPurple = Color(0xFF6B4EFF);
@@ -7,44 +10,9 @@ const Color kPurpleLight = Color(0xFF7B61FF);
 const Color kTeal = Color(0xFF2EC4B6);
 const Color kCardBg = Color(0xFFEDE9FF);
 
-// ── Profile Model ─────────────────────────────────────────────
-class ProfileData {
-  final String name;
-  final int age;
-  final String city;
-  final String distance;
-  final String imageUrl;
-  final String bio;
-  final List<String> interests;
-
-  const ProfileData({
-    required this.name,
-    required this.age,
-    required this.city,
-    required this.distance,
-    required this.imageUrl,
-    required this.bio,
-    required this.interests,
-  });
-}
-
-// ── Sample Profile ────────────────────────────────────────────
-const ProfileData sampleProfile = ProfileData(
-  name: 'Tanisha Agrawal',
-  age: 24,
-  city: 'Delhi',
-  distance: '11km',
-  imageUrl:
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&q=80',
-  bio:
-  'Lover of cold coffee, deep convos, and spontaneous weekend trips. If you can beat me at Uno, you win my heart',
-  interests: ['coffee', 'cats', 'R&B'],
-);
-
 // ── Main Screen ───────────────────────────────────────────────
 class ProfileDiscoveryScreen extends StatefulWidget {
-  final ProfileData? profile;
-  const ProfileDiscoveryScreen({super.key, this.profile});
+  const ProfileDiscoveryScreen({super.key});
 
   @override
   State<ProfileDiscoveryScreen> createState() => _ProfileDiscoveryScreenState();
@@ -64,11 +32,23 @@ class _ProfileDiscoveryScreenState extends State<ProfileDiscoveryScreen> {
     );
   }
 
+  void _handleLike(UserProvider provider, AppProfile profile) {
+    bool isMatch = provider.likeUser(profile.id);
+    if (isMatch) {
+      // Show Match Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MatchPopupScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color textColor = isDark ? Colors.white : Colors.black87;
-    final displayProfile = widget.profile ?? sampleProfile;
+    final userProvider = Provider.of<UserProvider>(context);
+    final discoveryPool = userProvider.discoveryPool;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -81,15 +61,33 @@ class _ProfileDiscoveryScreenState extends State<ProfileDiscoveryScreen> {
           ),
 
           Expanded(
-            child: SingleChildScrollView(
+            child: discoveryPool.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.person_search, size: 80, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No more profiles nearby!',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            )
+                : SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
                   // ── Profile Card ──
-                  _ProfileCard(profile: displayProfile),
+                  _ProfileCard(
+                    profile: discoveryPool.first,
+                    onLike: () => _handleLike(userProvider, discoveryPool.first),
+                    onPass: () => userProvider.likeUser('passed_${discoveryPool.first.id}'), // Dummy pass
+                  ),
                   const SizedBox(height: 12),
                   // ── Bio Card ──
-                  _BioCard(profile: displayProfile, textColor: textColor, isDark: isDark),
+                  _BioCard(profile: discoveryPool.first, textColor: textColor, isDark: isDark),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -118,12 +116,22 @@ class _ProfileDiscoveryScreenState extends State<ProfileDiscoveryScreen> {
 
 // ── Profile Card with image + action buttons ──────────────────
 class _ProfileCard extends StatelessWidget {
-  final ProfileData profile;
-  const _ProfileCard({required this.profile});
+  final AppProfile profile;
+  final VoidCallback onLike;
+  final VoidCallback onPass;
+
+  const _ProfileCard({
+    required this.profile,
+    required this.onLike,
+    required this.onPass,
+  });
 
   @override
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final sharedCount = userProvider.getSharedInterestsCount(profile);
+    final distance = userProvider.getDistanceInKm(profile);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
@@ -169,31 +177,55 @@ class _ProfileCard extends StatelessWidget {
               ),
             ),
 
-            // ── "Bio" badge ──
+            // ── "Matching Score" badge ──
             Positioned(
               top: 14,
               left: 14,
               child: Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.25),
+                  color: kPurple.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.5), width: 1),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black26, blurRadius: 4, offset: const Offset(0, 2)),
+                  ],
                 ),
-                child: const Text(
-                  'Bio',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.bolt, color: Colors.yellow, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Match: ${((sharedCount / 3) * 100).toInt()}%',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            // ── Name / Age / City ──
+            // ── Proximity badge ──
+            Positioned(
+              top: 14,
+              right: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '${distance.toStringAsFixed(1)} km away',
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+            ),
+
+            // ── Name / Age ──
             Positioned(
               left: 18,
               bottom: 72,
@@ -214,14 +246,6 @@ class _ProfileCard extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '${profile.city}, ${profile.distance}',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],
@@ -247,7 +271,7 @@ class _ProfileCard extends StatelessWidget {
                       iconColor: Colors.black87,
                       size: 52,
                       iconSize: 24,
-                      onTap: () {},
+                      onTap: onPass,
                     ),
                     _ActionButton(
                       icon: Icons.remove,
@@ -263,7 +287,7 @@ class _ProfileCard extends StatelessWidget {
                       iconColor: Colors.white,
                       size: 52,
                       iconSize: 26,
-                      onTap: () {},
+                      onTap: onLike, // Star also triggers like in this logic
                     ),
                     _ActionButton(
                       icon: Icons.favorite,
@@ -271,7 +295,7 @@ class _ProfileCard extends StatelessWidget {
                       iconColor: Colors.pink,
                       size: 52,
                       iconSize: 24,
-                      onTap: () {},
+                      onTap: onLike,
                     ),
                   ],
                 ),
@@ -286,7 +310,7 @@ class _ProfileCard extends StatelessWidget {
 
 // ── Bio Card ─────────────────────────────────────────────────
 class _BioCard extends StatelessWidget {
-  final ProfileData profile;
+  final AppProfile profile;
   final Color textColor;
   final bool isDark;
   const _BioCard({required this.profile, required this.textColor, required this.isDark});

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "800398940290",
+    "project_id": "wego-talk",
+    "storage_bucket": "wego-talk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800398940290:android:a8ad2b91352cffd5323c9b",
+        "android_client_info": {
+          "package_name": "com.chines.wego_talk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlkJmCmx04ceSj_rPYFoDIKQkwN6KEoT8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
